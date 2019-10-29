@@ -4,152 +4,8 @@
 #include <set>
 #include <iterator>
 #include <algorithm>
-#include "N_Triangles.hpp"
+#include "Geometry.hpp"
 using namespace std;
-
-template <typename T>
-Vector<T> operator+(const Vector<T>& a, const Vector<T>& b) {
-	return Vector<T>{a.x + b.x, a.y + b.y, a.z + b.z};
-}
-
-template <typename T>
-Vector<T> axb(const Vector<T>& a, const Vector<T>& b) {
-	Vector<T> c;
-	c.x = a.y*b.z - a.z*b.y;
-	c.y = a.z*b.x - a.x*b.z;
-	c.z = a.x*b.y - a.y*b.x;
-	return c;
-}
-
-template <typename T>
-bool operator==(const Point<T>& A, const Point<T>& B) {
-	return ((A.x == B.x) && (A.y == B.y));
-}
-
-template <typename T>
-T operator*(const Vector<T>& a, const Vector<T>& b) {  //scalar
-	return a.x*b.x + a.y*b.y + a.z*b.z;
-}
-
-template <typename T>
-Vector<T> operator*(const Vector<T>& a, const T& k) {
-	return Vector<T>{a.x*k, a.y*k, a.z*k};
-}
-
-template <typename T>
-Vector<T> operator/(const Vector<T>& a, const T& k) {
-	return Vector<T>{a.x / k, a.y / k, a.z / k};
-}
-
-template <typename T>
-T Vector<T>::length() const{
-	return sqrt(x*x + y*y + z*z);
-}
-
-template <typename T>
-T Line<T>::length() const{
-	return sqrt((fst.x - sec.x)*(fst.x - sec.x) +
-	            (fst.y - sec.y)*(fst.y - sec.y) +
-                (fst.z - sec.z)*(fst.z - sec.z));
-}
-
-template <typename T>
-bool operator!=(const Triangle<T>& t1, const Triangle<T>& t2) {
-	return (t1.pts != t2.pts);
-}
-
-template <typename T>
-T Triangle<T>::square() const {
-	Vector<T> AC(pts[0], pts[1]), AB(pts[0], pts[2]);
-	T sq = axb(AC, AB).length();
-	return abs(sq) / 2.0;
-}
-
-template <typename T>
-bool Triangle<T>::is_inside(const Point<T>& P) const{   //is P inside t?
-	Triangle t1(P, pts[0], pts[1]), 
-             t2(P, pts[1], pts[2]),
-			 t3(P, pts[2], pts[0]);
-    if (t1.square() + t2.square() + t3.square() - square() <= 0.00000000001)
-        return true;
-    return false;
-}
-
-template <typename T>
-bool Line<T>::is_inter(const Line<T>& L) const{   // are from different sides?
-	Vector<T> left(L.fst, sec), right(L.sec, sec), mid(fst, sec);
-	Vector<T> ans1 = axb(mid, left), ans2 = axb(mid, right);
-	if ((ans1*ans2 < 0))// && (axb(ans1, ans2).length() == 0))
-        return true;
-    return false;
-}
-
-template <typename T>
-bool Line<T>::is_crossing(const Line<T>& L) const{
-	return is_inter(L) && L.is_inter(*this);
-}
-
-template <typename T>
-bool Line<T>::cross_on_plane(const Triangle<T> &t) const{
-	for (int j = 0; j < 3; j++) {
-		Line<T> L{t.pts[j], t.pts[(j + 1) % 3]};
-		if (is_crossing(L)) {    //peresecautcya
-			return true;
-		}
-	}
-	return false;
-}
-
-template <typename T>
-Line<T> Triangle<T>::max_side() const{
-	Line<T> L1{pts[0], pts[1]}, L2{pts[1], pts[2]}, L3{pts[2], pts[0]};
-	return max({L1, L2, L3}, [](const Line<T>& Lhs, const Line<T>& Rhs) {
-	                            return Lhs.length() < Rhs.length(); });
-}
-
-template <typename T>
-bool Triangle<T>::is_cross(const Triangle<T>& rhs) const{
-	bool irs = false;
-	for (int i = 0; i < 3; i++) {
-		Vector<T> CV{rhs.pts[(i + 1) % 3], rhs.pts[i]};
-		Vector<T> CA{pts[0], rhs.pts[i]};
-		Plane<T> pl{axb(Vector<T>{pts[0], pts[1]}, Vector<T>{pts[0], pts[2]})};
-		if (CV*pl.n == 0) {
-		    if (Line<T>{rhs.pts[(i + 1) % 3], rhs.pts[i]}.cross_on_plane(*this)){
-				irs = true;
-				break;
-		    }
-		    continue;
-		}
-		T K = abs((CA*pl.n) / (CV*pl.n));
-		if (K > 1)
-		    continue;
-		    
-		Vector<T> CM = CV*K, OC{rhs.pts[i], Point<T>{}};
-		Vector<T> OM = OC + CM;
-		if (is_inside(Point<T>{OM.x, OM.y, OM.z})) {
-			irs = true;
-			break;
-		}
-	}
-	return irs;
-}
-
-template <typename T>
-bool Triangle<T>::is_intersect(const Triangle<T>& rhs) const{
-	return (is_cross(rhs) || rhs.is_cross(*this));
-}
-
-
-template <typename T>
-bool Triangle<T>::is_far(const Triangle<T>& rhs) const {  //compares the radii of the sphere in which the triangles are enclosed
-	Line<T> R1 = max_side(), R2 = rhs.max_side();
-	T RO = R1.length() + R2.length();
-	return ((RO < Line<T>{R1.fst, R2.fst}.length()) ||
-			(RO < Line<T>{R1.fst, R2.sec}.length()) ||
-			(RO < Line<T>{R1.sec, R2.fst}.length()) ||
-		    (RO < Line<T>{R1.sec, R2.sec}.length()));
-}
 
 template <typename T>
 set<int> intersecting_triangles(const vector<Triangle<T>>& trgs) {
@@ -159,19 +15,12 @@ set<int> intersecting_triangles(const vector<Triangle<T>>& trgs) {
 			if (trgs[i].is_far(trgs[j]))
 			    continue;
 		    if (trgs[i].is_intersect(trgs[j])) {
-		    	//cout << "(" << i << "; " << j << ") ";
 		        res.insert(i);
 		        res.insert(j);
 		    }
 	    }
 	}
 	return res;
-}
-
-template <typename T>
-istream& operator>>(istream& stream, Point<T>& P) {
-	stream >> P.x >> P.y >> P.z;
-	return stream;
 }
 
 int main() {
