@@ -235,15 +235,13 @@ Line<T> Triangle<T>::max_side() const{
 
 template <typename T>
 bool Triangle<T>::is_cross(const Triangle<T>& rhs) const{
-	bool irs = false;
 	for (int i = 0; i < 3; i++) {
 		Vector<T> CV{rhs.pts[(i + 1) % 3], rhs.pts[i]};
 		Vector<T> CA{pts[0], rhs.pts[i]};
 		Plane<T> pl{axb(Vector<T>{pts[0], pts[1]}, Vector<T>{pts[0], pts[2]})};
 		if (CV*pl.n == 0) {
 		    if (Line<T>{rhs.pts[(i + 1) % 3], rhs.pts[i]}.cross_on_plane(*this)){
-				irs = true;
-				break;
+				return true;
 		    }
 		    continue;
 		}
@@ -254,11 +252,10 @@ bool Triangle<T>::is_cross(const Triangle<T>& rhs) const{
 		Vector<T> CM = CV*K, OC{rhs.pts[i], Point<T>{}};
 		Vector<T> OM = OC + CM;
 		if (is_inside(Point<T>{OM.x, OM.y, OM.z})) {
-			irs = true;
-			break;
+			return true;
 		}
 	}
-	return irs;
+	return false;
 }
 
 template <typename T>
