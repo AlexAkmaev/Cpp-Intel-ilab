@@ -3,6 +3,8 @@
 #include <iostream>
 #include <vector>
 #include <set>
+#include <algorithm>
+#include <utility>
 using namespace std;
 
 template <typename T>
@@ -26,6 +28,24 @@ struct Vector {
 
 template <typename T>
 struct Line;
+
+template <typename T>
+struct Triangle;
+
+template <typename T>
+struct Sphere {
+	Point<T> centr;
+	T R;
+	Sphere(const Triangle<T>& t) :
+		centr(Point<T>{(t.pts[0].x + t.pts[1].x + t.pts[2].x) / 3.0,
+                       (t.pts[0].y + t.pts[1].y + t.pts[2].y) / 3.0,
+					   (t.pts[0].z + t.pts[1].z + t.pts[2].z) / 3.0}),
+		R(max({Line<T>{t.pts[0], centr},Line<T>{t.pts[1], centr},Line<T>{t.pts[2], centr}},
+        [](const Line<T>& Lhs, const Line<T>& Rhs) {
+        		 return Lhs.length() < Rhs.length(); }).length()) {}
+	
+	bool intersect(const Sphere<T>& rhs) const;   //if spheres intersect returns True
+};
 
 template <typename T>
 struct Triangle {
@@ -68,8 +88,38 @@ struct Plane {
 
 template <typename T>
 bool operator==(const Point<T>& A, const Point<T>& B) {  //comparison operator for Points
-	return ((A.x == B.x) && (A.y == B.y));
+	return ((A.x == B.x) && (A.y == B.y) && (A.z == B.z));
 }
+
+template <typename T>
+bool operator<(const Point<T>& A, const Point<T>& B) {  //comparison operator for Points
+    if (A.x != B.x) 
+	    return A.x < B.x;
+    if (A.y != B.y)
+	    return A.y < B.y;
+    return A.z < B.z;
+}
+
+template <typename T>
+struct comp_x{
+	bool operator()(const pair<Point<T>, int>& c1, const pair<Point<T>, int>& c2) {
+	    return c1.first.x < c2.first.x;
+	}
+};
+
+template <typename T>
+struct comp_y{
+	bool operator()(const pair<Point<T>, int>& c1, const pair<Point<T>, int>& c2) {
+	    return c1.first.y < c2.first.y;
+	}
+};
+
+template <typename T>
+struct comp_z{
+	bool operator()(const pair<Point<T>, int>& c1, const pair<Point<T>, int>& c2) {
+	    return c1.first.z < c2.first.z;
+	}
+};
 
 template <typename T>
 istream& operator>>(istream& stream, Point<T>& P) {  //input operator
@@ -150,18 +200,14 @@ bool Line<T>::is_inter(const Line<T>& L) const{   // are from different sides?
 }
 
 template <typename T>
-bool Triangle<T>::is_far(const Triangle<T>& rhs) const {  //compares the radii of the sphere in which the triangles are enclosed
-	Line<T> R1 = max_side(), R2 = rhs.max_side();
-	T RO = R1.length() + R2.length();
-	return ((RO < Line<T>{R1.fst, R2.fst}.length()) ||
-			(RO < Line<T>{R1.fst, R2.sec}.length()) ||
-			(RO < Line<T>{R1.sec, R2.fst}.length()) ||
-		    (RO < Line<T>{R1.sec, R2.sec}.length()));
+bool Sphere<T>::intersect(const Sphere<T>& rhs) const {  //compares the radii of the sphere in which the triangles are enclosed
+	T RO = R + rhs.R;
+	return (RO - Line<T>{centr, rhs.centr}.length() >= 0.000001); 
 }
 
 template <typename T>
-bool Triangle<T>::is_intersect(const Triangle<T>& rhs) const{
-	return (is_cross(rhs) || rhs.is_cross(*this));
+bool Triangle<T>::is_far(const Triangle<T>& rhs) const {
+	return !Sphere<T>{*this}.intersect(Sphere<T>{rhs});  //if Cubes don't intersect returns True
 }
 
 template <typename T>
@@ -213,6 +259,11 @@ bool Triangle<T>::is_cross(const Triangle<T>& rhs) const{
 		}
 	}
 	return irs;
+}
+
+template <typename T>
+bool Triangle<T>::is_intersect(const Triangle<T>& rhs) const{
+	return (is_cross(rhs) || rhs.is_cross(*this));
 }
 
 template <typename T>
