@@ -23,6 +23,10 @@ struct Vector {
     Vector(const T& x_, const T& y_, const T& z_) : 
         x (x_), y (y_), z (z_) {}
         
+    Vector<T>& operator+=(const Vector<T>& b);  //adds a vector to Vector
+    
+    Vector<T>& operator*=(const T& k);   //multiplies vectors by a number
+        
     T length() const;  //module of the vector
 };
 
@@ -40,9 +44,9 @@ struct Sphere {
 		centr(Point<T>{(t.pts[0].x + t.pts[1].x + t.pts[2].x) / 3.0,
                        (t.pts[0].y + t.pts[1].y + t.pts[2].y) / 3.0,
 					   (t.pts[0].z + t.pts[1].z + t.pts[2].z) / 3.0}),
-		R(max({Line<T>{t.pts[0], centr},Line<T>{t.pts[1], centr},Line<T>{t.pts[2], centr}},
+		R(max({Line<T>{t.pts[0], centr}, Line<T>{t.pts[1], centr}, Line<T>{t.pts[2], centr}},
         [](const Line<T>& Lhs, const Line<T>& Rhs) {
-        		 return Lhs.length() < Rhs.length(); }).length()) {}
+        		 return Lhs.length_squared() < Rhs.length_squared(); }).length()) {}
 	
 	bool intersect(const Sphere<T>& rhs) const;   //if spheres intersect returns True
 };
@@ -73,6 +77,8 @@ struct Line {
 	
 	T length() const;  //length of line
 	
+	T length_squared() const;  //length squared
+	
 	bool is_inter(const Line<T>& L) const;  //are ends of L2 from different sides of L1?
 	
 	bool is_crossing(const Line<T>& L) const;  //do lines intersect?
@@ -102,22 +108,22 @@ bool operator<(const Point<T>& A, const Point<T>& B) {  //comparison operator fo
 
 template <typename T>
 struct comp_x{
-	bool operator()(const pair<Point<T>, int>& c1, const pair<Point<T>, int>& c2) {
-	    return c1.first.x < c2.first.x;
+	bool operator()(const pair<Point<T>, int>& p1, const pair<Point<T>, int>& p2) {
+	    return p1.first.x < p2.first.x;
 	}
 };
 
 template <typename T>
 struct comp_y{
-	bool operator()(const pair<Point<T>, int>& c1, const pair<Point<T>, int>& c2) {
-	    return c1.first.y < c2.first.y;
+	bool operator()(const pair<Point<T>, int>& p1, const pair<Point<T>, int>& p2) {
+	    return p1.first.y < p2.first.y;
 	}
 };
 
 template <typename T>
 struct comp_z{
-	bool operator()(const pair<Point<T>, int>& c1, const pair<Point<T>, int>& c2) {
-	    return c1.first.z < c2.first.z;
+	bool operator()(const pair<Point<T>, int>& p1, const pair<Point<T>, int>& p2) {
+	    return p1.first.z < p2.first.z;
 	}
 };
 
@@ -133,23 +139,25 @@ T Vector<T>::length() const {
 }
 
 template <typename T>
-Vector<T> operator+(const Vector<T>& a, const Vector<T>& b) {  //operator is vector addition
-	return Vector<T>{a.x + b.x, a.y + b.y, a.z + b.z};
+Vector<T>& Vector<T>::operator+=(const Vector<T>& b) {  //operator is vector addition
+    x += b.x; y += b.y; z += b.z;
+	return *this;
 }
 
 template <typename T>
-T operator*(const Vector<T>& a, const Vector<T>& b) {  //scalar product
-	return a.x*b.x + a.y*b.y + a.z*b.z;
-}
-
-template <typename T>
-Vector<T> operator*(const Vector<T>& a, const T& k) {  //operator of multiplication of a vector by a number
-	return Vector<T>{a.x*k, a.y*k, a.z*k};
+Vector<T>& Vector<T>::operator*=(const T& k) {  //operator of multiplication of a vector by a number
+    x *= k; y *= k; z *= k;
+	return *this;
 }
 
 template <typename T>
 Vector<T> operator/(const Vector<T>& a, const T& k) {  //operator of division of a vector by a number
 	return Vector<T>{a.x / k, a.y / k, a.z / k};
+}
+
+template <typename T>
+T operator*(const Vector<T>& a, const Vector<T>& b) {  //scalar product
+	return a.x*b.x + a.y*b.y + a.z*b.z;
 }
 
 template <typename T>
@@ -169,6 +177,13 @@ T Line<T>::length() const{
 }
 
 template <typename T>
+T Line<T>::length_squared() const{
+	return  (fst.x - sec.x)*(fst.x - sec.x) +
+            (fst.y - sec.y)*(fst.y - sec.y) +
+            (fst.z - sec.z)*(fst.z - sec.z);
+}
+
+template <typename T>
 bool operator!=(const Triangle<T>& t1, const Triangle<T>& t2) {  //comparison operator for Trinagles
 	return (t1.pts != t2.pts);
 }
@@ -185,7 +200,7 @@ bool Triangle<T>::is_inside(const Point<T>& P) const{   //is P inside t?
 	Triangle t1(P, pts[0], pts[1]), 
              t2(P, pts[1], pts[2]),
 			 t3(P, pts[2], pts[0]);
-    if (t1.square() + t2.square() + t3.square() - square() <= 0.00000000001)
+    if (t1.square() + t2.square() + t3.square() - square() <= 0.000000000001)
         return true;
     return false;
 }
@@ -202,7 +217,7 @@ bool Line<T>::is_inter(const Line<T>& L) const{   // are from different sides?
 template <typename T>
 bool Sphere<T>::intersect(const Sphere<T>& rhs) const {  //compares the radii of the sphere in which the triangles are enclosed
 	T RO = R + rhs.R;
-	return (RO - Line<T>{centr, rhs.centr}.length() >= 0.000001); 
+	return (RO*RO - Line<T>{centr, rhs.centr}.length_squared() >= 0.00000000001); 
 }
 
 template <typename T>
@@ -249,8 +264,8 @@ bool Triangle<T>::is_cross(const Triangle<T>& rhs) const{
 		if (K > 1)
 		    continue;
 		    
-		Vector<T> CM = CV*K, OC{rhs.pts[i], Point<T>{}};
-		Vector<T> OM = OC + CM;
+		Vector<T> CM = CV *= K, OC{rhs.pts[i], Point<T>{}};
+		Vector<T> OM = OC += CM;
 		if (is_inside(Point<T>{OM.x, OM.y, OM.z})) {
 			return true;
 		}
@@ -262,6 +277,10 @@ template <typename T>
 bool Triangle<T>::is_intersect(const Triangle<T>& rhs) const{
 	return (is_cross(rhs) || rhs.is_cross(*this));
 }
+
+template <typename T>
+void search_area(const typename vector<pair<Point<T>, int>>::iterator& y_beg, const typename vector<pair<Point<T>, int>>::iterator& y_end,
+                 T max_D, const vector<Triangle<T>>& trgs, set<int>& res);  //the area that we search intersections in
 
 template <typename T>
 set<int> intersecting_triangles(const vector<Triangle<T>>& trgs);  //finds pairs of intersecting triangles
