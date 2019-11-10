@@ -278,9 +278,62 @@ bool Triangle<T>::is_intersect(const Triangle<T>& rhs) const{
 	return (is_cross(rhs) || rhs.is_cross(*this));
 }
 
-template <typename T>
-void search_area(const typename vector<pair<Point<T>, int>>::iterator& y_beg, const typename vector<pair<Point<T>, int>>::iterator& y_end,
-                 T max_D, const vector<Triangle<T>>& trgs, set<int>& res);  //the area that we search intersections in
+
+template <typename T, typename It, typename It_trgs>
+void area_y(It x_beg, It x_end, T max_D, const It_trgs trgs_beg, set<int>& res) {  //the area sorted for y
+    sort(x_beg, x_end, comp_y<T>());
+	It y_beg = x_beg, y_end = x_beg, it_y = x_beg, it_y_end = x_end;
+	int ky = 0;
+	T dist_y = max_D;
+	
+	while (it_y != it_y_end) {
+		sort(y_beg, y_end, comp_y<T>());
+		if (ky == 0) {
+			y_end = lower_bound(y_beg, it_y_end, pair<Point<T>, int>{Point<T>{100, dist_y + max_D, 100}, 0}, comp_y<T>());
+			++ky;
+		} else {
+			y_beg = lower_bound(y_beg, it_y_end, pair<Point<T>, int>{Point<T>{100, dist_y - max_D, 100}, 0}, comp_y<T>());
+			y_end = lower_bound(y_beg, it_y_end, pair<Point<T>, int>{Point<T>{100, dist_y + max_D, 100}, 0}, comp_y<T>());
+		}
+		
+		sort(y_beg, y_end, comp_z<T>());
+		search_area(y_beg, y_end, max_D, trgs_beg, res);
+		
+		it_y = y_end;
+		dist_y += max_D;
+	}
+}
+
+template <typename T, typename It, typename It_trgs>
+void search_area(It y_beg, It y_end, T max_D, const It_trgs trgs_beg, set<int>& res) {  //the area that we search intersections in
+	T dist_z = max_D;
+    auto z_beg = y_beg, z_end = y_beg, it_z = y_beg, it_z_end = y_end;
+	int kz = 0;
+	
+	while (it_z != it_z_end) {
+		if (kz == 0) {
+			z_end = lower_bound(z_beg, it_z_end, pair<Point<T>, int>{Point<T>{100, 100, dist_z + max_D}, 0}, comp_z<T>());
+			++kz;
+		} else {
+			z_beg = lower_bound(z_beg, it_z_end, pair<Point<T>, int>{Point<T>{100, 100, dist_z - max_D}, 0}, comp_z<T>());
+			z_end = lower_bound(z_beg, it_z_end, pair<Point<T>, int>{Point<T>{100, 100, dist_z + max_D}, 0}, comp_z<T>());
+		}
+		
+		for (it_z = z_beg; it_z != z_end; ++it_z) {
+		    for (auto j_it = it_z + 1; j_it != z_end + 1; ++j_it) {
+		    	int i = it_z->second, j = j_it->second;
+		    	if ((*(trgs_beg + i)).is_far(*(trgs_beg + j))) {
+				    continue;
+				}
+			    if ((*(trgs_beg + i)).is_intersect(*(trgs_beg + j))) {
+			        res.insert(i);
+			        res.insert(j);
+			    }
+		    }
+		}
+		dist_z += max_D;
+	}
+}
 
 template <typename T>
 set<int> intersecting_triangles(const vector<Triangle<T>>& trgs);  //finds pairs of intersecting triangles
