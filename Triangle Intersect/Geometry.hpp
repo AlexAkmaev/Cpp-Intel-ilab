@@ -8,7 +8,7 @@
 using namespace std;
 
 template <typename T>
-struct Point { 
+struct Point {
     T x = 0, y = 0, z = 0;
     Point() = default;
     Point(const T& A, const T& B, const T& C) : x(A), y(B), z(C) {}
@@ -18,15 +18,15 @@ template <typename T>
 struct Vector {
 	T x = 0, y = 0, z = 0;
     Vector() = default;
-	Vector(const Point<T>& A, const Point<T>& B) : 
+	Vector(const Point<T>& A, const Point<T>& B) :
         x (A.x - B.x), y (A.y - B.y), z (A.z - B.z) {}
-    Vector(const T& x_, const T& y_, const T& z_) : 
+    Vector(const T& x_, const T& y_, const T& z_) :
         x (x_), y (y_), z (z_) {}
-        
+
     Vector<T>& operator+=(const Vector<T>& b);  //adds a vector to Vector
-    
+
     Vector<T>& operator*=(const T& k);   //multiplies vectors by a number
-        
+
     T length() const;  //module of the vector
 };
 
@@ -34,55 +34,56 @@ template <typename T>
 struct Line;
 
 template <typename T>
-struct Triangle;
-
-template <typename T>
-struct Sphere {
-	Point<T> centr;
-	T R;
-	Sphere(const Triangle<T>& t) :
-		centr(Point<T>{(t.pts[0].x + t.pts[1].x + t.pts[2].x) / 3.0,
-                       (t.pts[0].y + t.pts[1].y + t.pts[2].y) / 3.0,
-					   (t.pts[0].z + t.pts[1].z + t.pts[2].z) / 3.0}),
-		R(max({Line<T>{t.pts[0], centr}, Line<T>{t.pts[1], centr}, Line<T>{t.pts[2], centr}},
-        [](const Line<T>& Lhs, const Line<T>& Rhs) {
-        		 return Lhs.length_squared() < Rhs.length_squared(); }).length()) {}
-	
-	bool intersect(const Sphere<T>& rhs) const;   //if spheres intersect returns True
-};
+struct Sphere;
 
 template <typename T>
 struct Triangle {
 	Point<T> pts[3];
 	Triangle(const Point<T>& A, const Point<T>& B, const Point<T>& C) : pts {A, B, C} {}
-	
+
 	Line<T> max_side() const;  //max side of triangle
-	
+
 	T square() const;   //calculates the square of Triangle
-	
+
 	bool is_inside(const Point<T>& P) const;  //is P inside Trinagle?
-	
+
 	bool is_far(const Triangle<T>& rhs) const;  //is rhs far from triangle?
-	
+
 	bool is_cross(const Triangle<T>& rhs) const;  //does any of the sides of the triangle rhs intersect the triangle 'this'?
-	
+
 	bool is_intersect(const Triangle<T>& rhs) const;   //does triangle rhs intersect the triangle 'this'?
 };
+
+
+template <typename T>
+struct Sphere {
+	Point<T> centr;
+	T R;
+	Sphere(const Triangle<T>& t) : centr(Point<T>{(t.pts[0].x + t.pts[1].x + t.pts[2].x) / 3.0,
+                       (t.pts[0].y + t.pts[1].y + t.pts[2].y) / 3.0,
+					   (t.pts[0].z + t.pts[1].z + t.pts[2].z) / 3.0}),
+		R(max({Line<T>{t.pts[0], centr}, Line<T>{t.pts[1], centr}, Line<T>{t.pts[2], centr}},
+        [](const Line<T>& Lhs, const Line<T>& Rhs) {
+            return Lhs.length_squared() < Rhs.length_squared(); }).length()) {}
+
+	bool intersect(const Sphere<T>& rhs) const;   //if spheres intersect returns True
+};
+
 
 template <typename T>
 struct Line {
 	Point<T> fst, sec;
 	Line() = default;
 	Line(Point<T> A, Point<T> B) : fst(A), sec(B) {}
-	
+
 	T length() const;  //length of line
-	
+
 	T length_squared() const;  //length squared
-	
+
 	bool is_inter(const Line<T>& L) const;  //are ends of L2 from different sides of L1?
-	
+
 	bool is_crossing(const Line<T>& L) const;  //do lines intersect?
-	
+
 	bool cross_on_plane(const Triangle<T> &t) const;  //does the line intersect a triangle?
 };
 
@@ -99,7 +100,7 @@ bool operator==(const Point<T>& A, const Point<T>& B) {  //comparison operator f
 
 template <typename T>
 bool operator<(const Point<T>& A, const Point<T>& B) {  //comparison operator for Points
-    if (A.x != B.x) 
+    if (A.x != B.x)
 	    return A.x < B.x;
     if (A.y != B.y)
 	    return A.y < B.y;
@@ -197,7 +198,7 @@ T Triangle<T>::square() const {
 
 template <typename T>
 bool Triangle<T>::is_inside(const Point<T>& P) const{   //is P inside t?
-	Triangle t1(P, pts[0], pts[1]), 
+	Triangle t1(P, pts[0], pts[1]),
              t2(P, pts[1], pts[2]),
 			 t3(P, pts[2], pts[0]);
     if (t1.square() + t2.square() + t3.square() - square() <= 0.000000000001)
@@ -217,7 +218,7 @@ bool Line<T>::is_inter(const Line<T>& L) const{   // are from different sides?
 template <typename T>
 bool Sphere<T>::intersect(const Sphere<T>& rhs) const {  //compares the radii of the sphere in which the triangles are enclosed
 	T RO = R + rhs.R;
-	return (RO*RO - Line<T>{centr, rhs.centr}.length_squared() >= 0.00000000001); 
+	return (RO*RO - Line<T>{centr, rhs.centr}.length_squared() >= 0.00000000001);
 }
 
 template <typename T>
@@ -263,7 +264,7 @@ bool Triangle<T>::is_cross(const Triangle<T>& rhs) const{
 		T K = abs((CA*pl.n) / (CV*pl.n));
 		if (K > 1)
 		    continue;
-		    
+
 		Vector<T> CM = CV *= K, OC{rhs.pts[i], Point<T>{}};
 		Vector<T> OM = OC += CM;
 		if (is_inside(Point<T>{OM.x, OM.y, OM.z})) {
@@ -285,7 +286,7 @@ void area_y(It x_beg, It x_end, T max_D, const It_trgs trgs_beg, set<int>& res) 
 	It y_beg = x_beg, y_end = x_beg, it_y = x_beg, it_y_end = x_end;
 	int ky = 0;
 	T dist_y = max_D;
-	
+
 	while (it_y != it_y_end) {
 		sort(y_beg, y_end, comp_y<T>());
 		if (ky == 0) {
@@ -295,10 +296,10 @@ void area_y(It x_beg, It x_end, T max_D, const It_trgs trgs_beg, set<int>& res) 
 			y_beg = lower_bound(y_beg, it_y_end, pair<Point<T>, int>{Point<T>{100, dist_y - max_D, 100}, 0}, comp_y<T>());
 			y_end = lower_bound(y_beg, it_y_end, pair<Point<T>, int>{Point<T>{100, dist_y + max_D, 100}, 0}, comp_y<T>());
 		}
-		
+
 		sort(y_beg, y_end, comp_z<T>());
 		search_area(y_beg, y_end, max_D, trgs_beg, res);
-		
+
 		it_y = y_end;
 		dist_y += max_D;
 	}
@@ -307,9 +308,9 @@ void area_y(It x_beg, It x_end, T max_D, const It_trgs trgs_beg, set<int>& res) 
 template <typename T, typename It, typename It_trgs>
 void search_area(It y_beg, It y_end, T max_D, const It_trgs trgs_beg, set<int>& res) {  //the area that we search intersections in
 	T dist_z = max_D;
-    auto z_beg = y_beg, z_end = y_beg, it_z = y_beg, it_z_end = y_end;
+    It z_beg = y_beg, z_end = y_beg, it_z = y_beg, it_z_end = y_end;
 	int kz = 0;
-	
+
 	while (it_z != it_z_end) {
 		if (kz == 0) {
 			z_end = lower_bound(z_beg, it_z_end, pair<Point<T>, int>{Point<T>{100, 100, dist_z + max_D}, 0}, comp_z<T>());
@@ -318,9 +319,9 @@ void search_area(It y_beg, It y_end, T max_D, const It_trgs trgs_beg, set<int>& 
 			z_beg = lower_bound(z_beg, it_z_end, pair<Point<T>, int>{Point<T>{100, 100, dist_z - max_D}, 0}, comp_z<T>());
 			z_end = lower_bound(z_beg, it_z_end, pair<Point<T>, int>{Point<T>{100, 100, dist_z + max_D}, 0}, comp_z<T>());
 		}
-		
+
 		for (it_z = z_beg; it_z != z_end; ++it_z) {
-		    for (auto j_it = it_z + 1; j_it != z_end + 1; ++j_it) {
+		    for (auto j_it = it_z + 1; j_it != z_end; ++j_it) {
 		    	int i = it_z->second, j = j_it->second;
 		    	if ((*(trgs_beg + i)).is_far(*(trgs_beg + j))) {
 				    continue;

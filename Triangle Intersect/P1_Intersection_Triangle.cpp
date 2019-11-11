@@ -5,7 +5,7 @@
 #include <set>
 #include <iterator>
 #include <algorithm>
-#include "Triangle.h"
+#include "P1_Triangle.h"
 using namespace std;
 
 template <typename T>
@@ -29,7 +29,7 @@ void Polygon<T>::make_clockwise() {
 		        	swap(pts[2], pts[i]);
 			}
 		}
-		
+
 		if (cap > 3 && !is_crossing(Line<T>{pts[0], pts[3]}, Line<T>{pts[2], pts[4]})) {
 			if (is_crossing(Line<T>{pts[3], pts[4]}, Line<T>{pts[1], pts[0]}))
 			    reverse(begin(pts) + 1, end(pts) - 1);
@@ -37,7 +37,7 @@ void Polygon<T>::make_clockwise() {
 				swap(pts[3], pts[4]);
 			continue;
 		}
-		
+
 		if (cap > 4 && !is_crossing(Line<T>{pts[0], pts[4]}, Line<T>{pts[5], pts[3]})) {
 			if (!is_crossing(Line<T>{pts[5], pts[0]}, Line<T>{pts[1], pts[4]}))
 			    reverse(begin(pts) + 1, end(pts) - 1);
@@ -156,7 +156,7 @@ vector<Point<T>> Triangle<T>::cross(const Triangle<T> &t) const{
 
 template <typename T>
 bool Triangle<T>::is_inside(const Point<T>& P) const{   //is P inside t?
-	Triangle t1(P, pts[0], pts[1]), 
+	Triangle t1(P, pts[0], pts[1]),
              t2(P, pts[1], pts[2]),
 			 t3(P, pts[2], pts[0]);
     if (t1.square() + t2.square() + t3.square() == square())
@@ -203,12 +203,12 @@ int main() {
 	for(int i = 0; i < 3; i++) {
 		cin >> t1.pts[i].x >> t1.pts[i].y;
 	}
-	
+
 	for(int i = 0; i < 3; i++) {
 		cin >> t2.pts[i].x >> t2.pts[i].y;
 	}
-	
+
 	cout << t1.intersection_area(t2);
-	
+
 	return 0;
 }
