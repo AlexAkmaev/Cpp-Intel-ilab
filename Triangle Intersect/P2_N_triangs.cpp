@@ -54,12 +54,12 @@ int main() {
 		Triangle<double> t{A, B, C};
 		trgs.push_back(t);
 	}
-    unsigned int start_time =  clock();
+	
 	set<int> ans = intersecting_triangles(trgs);
-    unsigned int end_time = clock();
+	
 	for (auto it = ans.begin(), ite = ans.end(); it != ite; ++it) {
 		cout << *it << endl;
 	}
-    cout << (end_time - start_time) / 1000000.0 << endl;
+	
 	return 0;
 }
