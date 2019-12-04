@@ -10,7 +10,7 @@ Use the provided CMakeLists.txt with [CMake](https://cmake.org) to generate a bu
 ```
 cmake -G "Visual Studio 16 2019 Win64"
 ```
-Also download ConEmu for Windows to run tests in /examples directory by command:
+Also download ConEmu for Windows to run tests in /build/bin/Debug directory by command:
 ```
 triangle.exe < tests/{TEST_NAME}
 ```
