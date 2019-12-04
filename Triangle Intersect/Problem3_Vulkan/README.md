@@ -10,18 +10,6 @@ A comprehensive collection of open source C++ examples for [Vulkan®](https://ww
 + [Building](#Building)
 + [Examples](#Examples)
     + [Basics](#Basics)
-    + [Advanced](#Advanced)
-    + [Performance](#Performance)
-    + [Physically Based Rendering](#PBR)
-    + [Deferred](#Deferred)
-    + [Compute Shader](#ComputeShader)
-    + [Geometry Shader](#GeometryShader)
-    + [Tessellation Shader](#TessellationShader)
-    + [Headless](#Headless)
-    + [User Interface](#UserInterface)
-    + [Effects](#Effects)
-    + [Extensions](#Extensions)
-    + [Misc](#Misc)
 + [Credits and Attributions](#CreditsAttributions)
 
 
