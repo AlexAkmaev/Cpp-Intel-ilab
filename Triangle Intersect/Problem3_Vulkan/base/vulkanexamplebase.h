@@ -176,7 +176,7 @@ public:
 
 	Camera camera;
 
-	glm::vec3 rotation = glm::vec3(1, 0, 0);
+	glm::vec3 rotation = glm::vec3(1, 1, 1);
 	glm::vec3 cameraPos = glm::vec3(50, 50, 50);
 	glm::vec2 mousePos;
 

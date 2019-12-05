@@ -1,10 +1,8 @@
 /*
-* Vulkan Example - Basic indexed triangle rendering
+* A modified copy of one of Sascha Willems's projects:
 *
-* Note:
-*	This is a "pedal to the metal" example to show off how to get Vulkan up an displaying something
-*	Contrary to the other examples, this one won't make use of helper functions or initializers
-*	Except in a few cases (swap chain setup e.g.)
+*
+* Vulkan Example - set of intersecting triangles
 *
 * Copyright (C) 2016-2017 by Sascha Willems - www.saschawillems.de
 *
@@ -17,8 +15,9 @@
 
 VulkanExample::VulkanExample() : VulkanExampleBase(ENABLE_VALIDATION)
 	{
-		zoom = -2.5f;
-		title = "Vulkan Example - Basic indexed triangle";
+		zoom = -15.5f;
+		rotation = { 175.0f, -3320.0f, 0.0f };
+		title = "Vulkan Example - Set of intersecting triangles";
 		// Values not set here are initialized in the base class constructor
 	}
 
@@ -1035,9 +1034,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLin
 			vertexBuffer.push_back({ {C.x, C.y, C.z}, { 1, 0, 0 } , { pl.n.x, pl.n.y, pl.n.z} });
 			continue;
 		}
-		vertexBuffer.push_back({ {A.x, A.y, A.z}, { 0, 1, 0 } , { pl.n.x, pl.n.y, pl.n.z} });
-		vertexBuffer.push_back({ {B.x, B.y, B.z}, { 0, 1, 0 } , { pl.n.x, pl.n.y, pl.n.z} });
-		vertexBuffer.push_back({ {C.x, C.y, C.z}, { 0, 1, 0 } , { pl.n.x, pl.n.y, pl.n.z} });
+		vertexBuffer.push_back({ {A.x, A.y, A.z}, { 0, 1, 0.28 } , { pl.n.x, pl.n.y, pl.n.z} });
+		vertexBuffer.push_back({ {B.x, B.y, B.z}, { 0, 1, 0.28 } , { pl.n.x, pl.n.y, pl.n.z} });
+		vertexBuffer.push_back({ {C.x, C.y, C.z}, { 0, 1, 0.28 } , { pl.n.x, pl.n.y, pl.n.z} });
 	}
 
 	vulkanExample = new VulkanExample();
