@@ -17,7 +17,7 @@ A comprehensive collection of open source C++ examples for [Vulkan®](https://ww
 This repository contains submodules for external dependencies, so when doing a fresh clone you need to clone recursively:
 
 ```
-git clone --recursive https://github.com/SaschaWillems/Vulkan.git
+git clone --recursive https://github.com/AlexAkmaev/Cpp-Intel-ilab.git
 ``` 
 
 Existing repositories can be updated manually:
@@ -26,13 +26,6 @@ Existing repositories can be updated manually:
 git submodule init
 git submodule update
 ```
-
-## <a name="Assets"></a> Assets
-Many examples require assets from the asset pack that is not part of this repository due to file size. A python script is included to download the asset pack that. Run
-
-    python download_assets.py
-
-from the root of the repository after cloning or see [this](data/README.md) for manual download.
 
 ## <a name="Building"></a> Building
 
@@ -44,8 +37,20 @@ See [BUILD.md](BUILD.md) for details on how to build for the different platforms
 
 ### <a name="Basics"></a> Basics
 
-#### [01 - Triangle](examples/triangle/)
-Basic and verbose example for getting a colored triangle rendered to the screen using Vulkan. This is meant as a starting point for learning Vulkan from the ground up. A huge part of the code is boilerplate that is abstracted away in later examples.
+#### [01 - Triangle](MAIN_PROJECT/triangle/)
+Building a set of green triangles, which are repainted red at the intersection. This project is a modified copy of the Sasha Williams project referenced below. List of modified files as well as those added to the original project:
+1. In the folder shaders {PATH}/Problem3_Vulkan/shaders/*vert and shaders/*fraq are changed.
+2. Triangle header files have been added to the MAIN_PROJECT folder.hpp and Geometry.hpp, which are inserted into the main triangle program.cpp. In the latter, the main function as well as the methods of the VulkanExample class are changed.
+3. The tests folder has been added to the {PATH}/Problem3_Vulkan folder.
+4. After building the project, the build folder will appear in the {PATH}/Problem3_Vulkan folder, which is used to run the program and tests.
 
-## <a name="CreditsAttributions"></a> Credits and Attributions
-See [CREDITS.md](CREDITS.md) for additional credits and attributions.
+
+This project uses code from Vulkan Example Collection by SaschaWillems: https://github.com/SaschaWillems/Vulkan
+
+The MIT License (MIT)
+
+Copyright (c) 2016 Sascha Willems
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
