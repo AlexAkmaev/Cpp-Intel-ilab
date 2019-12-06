@@ -13,7 +13,7 @@ cmake -G "Visual Studio 16 2019 Win64"
 This project is going only for Windows. 
 Preparation for the construction of the project:
 - install Visual Studio 2019. This IDE is the best way to build a project.
-- install ConUmu. Tests will be run through this command line.
+- install ConEmu. Tests will be run through this command line.
 - install CMake for Windows. It will be more convenient to open the application directly, rather than build the project from the command line.
 - install VulkanSDK.
 
