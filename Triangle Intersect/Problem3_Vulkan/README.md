@@ -40,7 +40,7 @@ See [BUILD.md](BUILD.md) for details on how to build the project.
 #### [01 - Triangle](MAIN_PROJECT/triangle/)
 Building a set of green triangles, which are repainted red at the intersection. This project is a modified copy of the Sasha Williams project referenced below. The changed fragments are marked with "//***CHANGED***BEG" and "//***CHANGED***END".List of modified files as well as those added to the original project:
 1. In the folder shaders {PATH}/Problem3_Vulkan/shaders/*vert and shaders/*fraq are changed.
-2. Triangle header files have been added to the MAIN_PROJECT folder.hpp and Geometry.hpp, which are inserted into the main triangle.cpp. In the latter, the main function as well as the methods of the VulkanExample class are changed.
+2. Triangle.hpp and Geometry.hpp header files have been added to the MAIN_PROJECT folder, which are inserted into the main triangle.cpp. In the latter, the main function as well as the methods of the VulkanExample class are changed.
 3. The tests folder has been added to the {PATH}/Problem3_Vulkan folder.
 4. After building the project, the build folder will appear in the {PATH}/Problem3_Vulkan folder, which is used to run the program and tests.
 
