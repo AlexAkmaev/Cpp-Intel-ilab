@@ -29,9 +29,9 @@ git submodule update
 
 ## <a name="Building"></a> Building
 
-The repository contains everything required to compile and build the examples on <img src="./images/windowslogo.png" alt="" height="22px" valign="bottom"> Windows using a C++ compiler that supports C++11.
+The repository contains everything required to compile and build the examples on Windows using a C++ compiler that supports C++11.
 
-See [BUILD.md](BUILD.md) for details on how to build for the different platforms.
+See [BUILD.md](BUILD.md) for details on how to build in details.
 
 ## <a name="Examples"></a> Examples
 
