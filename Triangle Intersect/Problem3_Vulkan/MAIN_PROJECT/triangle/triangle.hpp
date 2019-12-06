@@ -1,3 +1,8 @@
+/*
+* A modified copy of one of Sascha Willems's project. 
+* The changed fragments will be marked with "//***CHANGED***BEG" and "//***CHANGED***END".
+*/
+
 #pragma once
 
 #include <stdio.h>
@@ -31,7 +36,7 @@ public:
 	struct Vertex {
 		float position[3];
 		float color[3];
-		float normal[3];
+		float normal[3];   //***CHANGED***BEG  -  //***CHANGED***END
 	};
 
 	// Vertex buffer and attributes
@@ -67,7 +72,7 @@ public:
 	//
 	// This way we can just memcopy the ubo data to the ubo
 	// Note: You should use data types that align with the GPU in order to avoid manual padding (vec4, mat4)
-
+//***CHANGED***BEG
 	struct {
 		glm::mat4 projectionMatrix;
 		glm::mat4 modelMatrix;
@@ -76,7 +81,7 @@ public:
 	} uboVS;
 
 	glm::vec3 lightPos = { -4.0f, -4.0f, -4.0f };
-
+//***CHANGED***END
 	// The pipeline layout is used by a pipline to access the descriptor sets 
 	// It defines interface (without binding any actual data) between the shader stages used by the pipeline and the shader resources
 	// A pipeline layout can be shared among multiple pipelines as long as their interfaces match

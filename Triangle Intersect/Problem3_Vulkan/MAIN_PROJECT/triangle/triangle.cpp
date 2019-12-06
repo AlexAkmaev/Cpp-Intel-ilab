@@ -1,5 +1,6 @@
 /*
-* A modified copy of one of Sascha Willems's projects:
+* A modified copy of one of Sascha Willems's project. 
+* The changed fragments will be marked with "//***CHANGED***BEG" and "//***CHANGED***END".
 *
 *
 * Vulkan Example - set of intersecting triangles
@@ -12,7 +13,7 @@
 #include "triangle.hpp"
 #include "Geometry.hpp"
 
-
+//***CHANGED***BEG
 VulkanExample::VulkanExample() : VulkanExampleBase(ENABLE_VALIDATION)
 	{
 		zoom = -15.5f;
@@ -20,6 +21,7 @@ VulkanExample::VulkanExample() : VulkanExampleBase(ENABLE_VALIDATION)
 		title = "Vulkan Example - Set of intersecting triangles";
 		// Values not set here are initialized in the base class constructor
 	}
+//***CHANGED***END
 
 VulkanExample::~VulkanExample()
 {
@@ -260,6 +262,7 @@ void VulkanExample::draw()
 	VK_CHECK_RESULT(swapChain.queuePresent(queue, currentBuffer, renderCompleteSemaphore));
 }
 
+//***CHANGED***BEG
 // Prepare vertex and index buffers for an indexed triangle
 // Also uploads them to device local memory using staging and initializes vertex input and attribute binding to match the vertex shader
 void VulkanExample::prepareVertices(bool useStagingBuffers, std::vector<Vertex>& vertexBuffer)
@@ -272,9 +275,9 @@ void VulkanExample::prepareVertices(bool useStagingBuffers, std::vector<Vertex>&
 	Point<float> A{ lightPos.x + 0.5f, lightPos.y + 0.5f, lightPos.z + 0.5f }, B{ A.x + 1.0f, A.y, A.z },
 		C{ A.x, A.y - 1.5f, A.z - 1.5f };
 	Plane<float> pl{ axb(Vector<float>{A, B}, Vector<float>{A, C}) };
-	vertexBuffer.push_back({ {A.x, A.y, A.z }, { 1, 1, 0 } , { pl.n.x, pl.n.y, pl.n.z} });
-	vertexBuffer.push_back({ {B.x, B.y, B.z }, { 1, 1, 0 } , { pl.n.x, pl.n.y, pl.n.z} });
-	vertexBuffer.push_back({ {C.x, C.y, C.z }, { 1, 1, 0 } , { pl.n.x, pl.n.y, pl.n.z} });
+	vertexBuffer.push_back({ {A.x, A.y, A.z }, { 1.0f, 1.0f, 0.0f } , { pl.n.x, pl.n.y, pl.n.z} });
+	vertexBuffer.push_back({ {B.x, B.y, B.z }, { 1.0f, 1.0f, 0.0f } , { pl.n.x, pl.n.y, pl.n.z} });
+	vertexBuffer.push_back({ {C.x, C.y, C.z }, { 1.0f, 1.0f, 0.0f } , { pl.n.x, pl.n.y, pl.n.z} });
 
 	uint32_t vertexBufferSize = static_cast<uint32_t>(vertexBuffer.size()) * sizeof(Vertex);
 
@@ -283,6 +286,7 @@ void VulkanExample::prepareVertices(bool useStagingBuffers, std::vector<Vertex>&
 	for (uint32_t i = 0; i < vertexBuffer.size(); i++) {
 		indexBuffer.push_back(i);
 	}
+//***CHANGED***END
 	indices.count = static_cast<uint32_t>(indexBuffer.size());
 	uint32_t indexBufferSize = indices.count * sizeof(uint32_t);
 
@@ -822,7 +826,7 @@ void VulkanExample::preparePipelines()
 	vertexInputBinding.binding = 0;
 	vertexInputBinding.stride = sizeof(Vertex);
 	vertexInputBinding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
+//***CHANGED***BEG
 	// Inpute attribute bindings describe shader attribute locations and memory layouts
 	std::array<VkVertexInputAttributeDescription, 3> vertexInputAttributs;
 	// These match the following shader layout (see triangle.vert):
@@ -879,7 +883,7 @@ void VulkanExample::preparePipelines()
 	// Main entry point for the shader
 	shaderStages[1].pName = "main";
 	assert(shaderStages[1].module != VK_NULL_HANDLE);
-
+//***CHANGED***END
 	// Set pipeline shader stage info
 	pipelineCreateInfo.stageCount = static_cast<uint32_t>(shaderStages.size());
 	pipelineCreateInfo.pStages = shaderStages.data();
@@ -945,6 +949,7 @@ void VulkanExample::prepareUniformBuffers()
 	updateUniformBuffers();
 }
 
+//***CHANGED***BEG
 void VulkanExample::updateUniformBuffers()
 {
 	// Update matrices
@@ -982,6 +987,7 @@ void VulkanExample::prepare(std::vector<VulkanExample::Vertex>& vertexBuffer)
 	buildCommandBuffers();
 	prepared = true;
 }
+//***CHANGED***END
 
 void VulkanExample::render()
 {
@@ -1007,6 +1013,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 	return (DefWindowProc(hWnd, uMsg, wParam, lParam));
 }
+//***CHANGED***BEG
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nCmdShow)
 {
 	for (size_t i = 0; i < __argc; i++) { VulkanExample::args.push_back(__argv[i]); };
@@ -1029,14 +1036,14 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLin
 		Point<float> A = trgs[i].pts[0], B = trgs[i].pts[1], C = trgs[i].pts[2];
 		Plane<float> pl{ axb(Vector<float>{A, B}, Vector<float>{A, C}) };
 		if (ans.find(i) != ans.end()) {
-			vertexBuffer.push_back({ {A.x, A.y, A.z}, { 1, 0, 0 } , { pl.n.x, pl.n.y, pl.n.z} });
-			vertexBuffer.push_back({ {B.x, B.y, B.z}, { 1, 0, 0 } , { pl.n.x, pl.n.y, pl.n.z} });
-			vertexBuffer.push_back({ {C.x, C.y, C.z}, { 1, 0, 0 } , { pl.n.x, pl.n.y, pl.n.z} });
+			vertexBuffer.push_back({ {A.x, A.y, A.z}, { 1.0f, 0.0f, 0.0f } , { pl.n.x, pl.n.y, pl.n.z} });
+			vertexBuffer.push_back({ {B.x, B.y, B.z}, { 1.0f, 0.0f, 0.0f } , { pl.n.x, pl.n.y, pl.n.z} });
+			vertexBuffer.push_back({ {C.x, C.y, C.z}, { 1.0f, 0.0f, 0.0f } , { pl.n.x, pl.n.y, pl.n.z} });
 			continue;
 		}
-		vertexBuffer.push_back({ {A.x, A.y, A.z}, { 0, 1, 0.28 } , { pl.n.x, pl.n.y, pl.n.z} });
-		vertexBuffer.push_back({ {B.x, B.y, B.z}, { 0, 1, 0.28 } , { pl.n.x, pl.n.y, pl.n.z} });
-		vertexBuffer.push_back({ {C.x, C.y, C.z}, { 0, 1, 0.28 } , { pl.n.x, pl.n.y, pl.n.z} });
+		vertexBuffer.push_back({ {A.x, A.y, A.z}, { 0.0f, 1.0f, 0.28f } , { pl.n.x, pl.n.y, pl.n.z} });
+		vertexBuffer.push_back({ {B.x, B.y, B.z}, { 0.0f, 1.0f, 0.28f } , { pl.n.x, pl.n.y, pl.n.z} });
+		vertexBuffer.push_back({ {C.x, C.y, C.z}, { 0.0f, 1.0f, 0.28f } , { pl.n.x, pl.n.y, pl.n.z} });
 	}
 
 	vulkanExample = new VulkanExample();
@@ -1047,3 +1054,4 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLin
 	delete(vulkanExample);
 	return 0;
 }
+//***CHANGED***END
