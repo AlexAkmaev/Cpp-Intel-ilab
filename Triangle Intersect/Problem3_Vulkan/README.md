@@ -31,7 +31,7 @@ git submodule update
 
 The repository contains everything required to compile and build the examples on Windows using a C++ compiler that supports C++11.
 
-See [BUILD.md](BUILD.md) for details on how to build in details.
+See [BUILD.md](BUILD.md) for details on how to build the project.
 
 ## <a name="Examples"></a> Examples
 
