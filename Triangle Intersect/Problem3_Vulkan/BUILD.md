@@ -27,11 +27,11 @@ Where to build the binaries: {PATH}/Problem3_Vulkan/build
 Click "Configure" and then "Generate". Now you have a directory with an .exe file that you can run.
 
 2. Go to the {PATH}/Problem3_Vulkan/build directory. Open the vulkanExamples.sln . 
-In the window that opens, go to triangle folder, click right mouse-button and click "Assign to startup project". 
+In the window that opens, go to triangle folder, click right mouse-button on it and click "Assign to startup project". 
 Now run the triangle.cpp by pressing ctrl+F7 or ctrl+F5. There should be a new folder in the build directory - bin.
 
 3. Go to the bin/Debug folder. Move or copy the tests folder from 
-{PATH}/Proble3_Vulkan directory in bin/Debug for convenience. 
+{PATH}/Problem3_Vulkan directory in bin/Debug for convenience. 
 
 4. Open ConEmu, go to {PATH}/Problem3_Vulkan/build/bin/Debug. You can now run tests.
 
