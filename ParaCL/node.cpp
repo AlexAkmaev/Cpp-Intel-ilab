@@ -6,7 +6,7 @@ Variable::Variable(int x) : _x(x) {}
 int Variable::Evaluate() const { return _x; }
 
 /*** class Op ***/
-Op::Op(string val)
+Op::Op(std::string val)
     : precedence([val] {
         if (val == "*" || val == "/") {
           return 6;
@@ -53,6 +53,6 @@ int Op::Evaluate() const {
   return 0;
 }
 
-void Op::SetLeft(shared_ptr<Node> node) { _left = node; }
-void Op::SetRight(shared_ptr<Node> node) { _right = node; }
+void Op::SetLeft(std::shared_ptr<Node> node) { _left = node; }
+void Op::SetRight(std::shared_ptr<Node> node) { _right = node; }
 

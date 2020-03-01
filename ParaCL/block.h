@@ -1,26 +1,32 @@
 #pragma once
 
-#include <iostream>
 #include <sstream>
 #include <algorithm>
 #include <fstream>
-#include <map>
 #include <tuple>
-#include <vector>
-#include <cstdlib>
 #include "token.h"
 #include "node.h"
 
 
-using namespace std;
-
+/*** Shunting-yard algorithm ***
+	It's a method for parsing mathematical expressions specified in infix notation. 
+	It can produce either a postfix notation string, also known as Reverse Polish notation (RPN).
+	An example of a simple conversion:
+	1. Input: 3 + 4
+	2. Push 3 to the output queue (whenever a number is read it is pushed to the output)
+	3. Push + onto the operator stack
+	4. Push 4 to the output queue
+	5. After reading the expression, pop the operators with the highest precedence off the stack and add them to the output.
+	6. In this case there is only one, "+".
+	7. Output: 3 4 +
+***/
 
 class Block {
 public:	
   
-	explicit Block(const map<string, int>& values);
+	explicit Block(const std::map<std::string, int>& values);  //ctor
 
-	const map<string, int>& map_names();
+	const std::map<std::string, int>& map_names();  //returns a constant reference to the storage
 	
 	/*** Shunting-yard algorithm ***/
 	template <class Iterator>
@@ -30,11 +36,11 @@ public:
 	  if (token == end) {
 	    return 0;
 	  } else if (end - token == 1 && token->type == TokenType::Data) {
-	  	return atoi(token->value.c_str());
+	  	return std::atoi(token->value.c_str());
 	  }
 	
-	  stack<shared_ptr<Node>> values;
-	  stack<shared_ptr<Op>> ops;
+	  std::stack<std::shared_ptr<Node>> values;
+	  std::stack<std::shared_ptr<Op>> ops;
 	  
 	  auto PopOps = [&](int precedence) {
 	    while (!ops.empty() && ops.top()->precedence >= precedence) {
@@ -55,34 +61,34 @@ public:
 	    const auto &val = *token;
 	    if (val.value == "*" || val.value == "/") {
 	      PopOps(6);
-	      ops.push(make_shared<Op>(val.value));
+	      ops.push(std::make_shared<Op>(val.value));
 	    } else if (val.value == "+" || val.value == "-") {
 	      PopOps(5);
-	      ops.push(make_shared<Op>(val.value));
+	      ops.push(std::make_shared<Op>(val.value));
 	    } else if (val.value == "<" || val.value == "<=" || val.value == ">" || val.value == ">=") {
 	      PopOps(4);
-	      ops.push(make_shared<Op>(val.value));
+	      ops.push(std::make_shared<Op>(val.value));
 	    } else if (val.value == "!=" || val.value == "==") {
 	      PopOps(3);
-	      ops.push(make_shared<Op>(val.value));
+	      ops.push(std::make_shared<Op>(val.value));
 	    } else if (val.value == "&&") {
 	      PopOps(2);
-	      ops.push(make_shared<Op>(val.value));
+	      ops.push(std::make_shared<Op>(val.value));
 	    } else if (val.value == "||") {
 	      PopOps(1);
-	      ops.push(make_shared<Op>(val.value));
+	      ops.push(std::make_shared<Op>(val.value));
 	    } else {
 	      if (val.type == TokenType::Data) {
-	      	values.push(make_shared<Variable>(atoi(val.value.c_str())));
+	      	values.push(std::make_shared<Variable>(atoi(val.value.c_str())));
 	      } else if (val.type == TokenType::Paren_LEFT) {
 	      	auto paren_right = find_pair_bracket(token + 1, end, TokenType::Paren_LEFT);
 	      	if (paren_right == end)
-					  throw logic_error("Wrong Syntax");
-	        values.push(make_shared<Variable>(Parse(token + 1, paren_right)));
+					  throw std::logic_error("Wrong Syntax");
+	        values.push(std::make_shared<Variable>(Parse(token + 1, paren_right)));
 	        if ((token = paren_right + 1) == end)
 	          break;
 	      } else {
-	        values.push(make_shared<Variable>(name_value.at(val.value)));
+	        values.push(std::make_shared<Variable>(name_value.at(val.value)));
 	      }
 	    }
 	
@@ -97,10 +103,10 @@ public:
 	  return node->Evaluate();
 	}
 
-	void Execution(const vector<Token>& tokens);
+	void Execution(const std::vector<Token>& tokens);  //running a ParaCl program based on parsed tokens
 	
 private:
-	map<string, int> name_value;
+	std::map<std::string, int> name_value;
 };
 
-bool operator==(const Token& t1, const Token& t2);
+bool operator==(const Token& t1, const Token& t2);  //comparing operator for tokens

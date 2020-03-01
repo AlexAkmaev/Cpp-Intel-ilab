@@ -3,7 +3,7 @@
 #include <sstream>
 #include <vector>
 #include <iostream>
-using namespace std;
+#include <string>
 
 enum class TokenType {
 	Logic_Op,
@@ -18,18 +18,18 @@ enum class TokenType {
 	Data,
 	Endl,
 	String,
-  Paren_LEFT,
-  Paren_RIGHT,
-  Bracelet_LEFT,
-  Bracelet_RIGHT,
-  Semicolon,
+	Paren_LEFT,
+	Paren_RIGHT,
+	Bracelet_LEFT,
+	Bracelet_RIGHT,
+	Semicolon,
 };
 
 struct Token {
-  const string value;
+  const std::string value;
   const TokenType type;
 };
 
-vector<Token> Tokenize(istream& is);
-ostream& operator<< (ostream& os, const TokenType& t);  //output operator for the token
+std::vector<Token> Tokenize(std::istream& is);  //splits the file into tokens
+std::ostream& operator<< (std::ostream& os, const TokenType& t);  //output operator for the token
 

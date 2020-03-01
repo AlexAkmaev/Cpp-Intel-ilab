@@ -1,36 +1,33 @@
-#include <iostream>
-#include <string>
-#include <map>
-#include <vector>
 #include "block.h"
 #include "token.h"
 
-using namespace std;
-
-//output a parsed file
-void token_parsed_file(const vector<Token>& tokens) {
+/* token_parsed_file *
+	To print a parsed file for tokens, pass the ParFile keyword
+	as the third parameter to the command line parameters.
+*/
+void token_parsed_file(const std::vector<Token>& tokens) {
 	for(const auto& i : tokens) {
-		cout << i.value << "  ";
+		std::cout << i.value << "  ";
 		if (i.type == TokenType::Semicolon) {
-	    cout << endl;
+	    std::cout << std::endl;
 		}
 	}
 }
 
 int main(int argc, char *argv[]) {
 	
-	fstream is;
-	is.open(argv[1], ios::in);
+	std::fstream is;
+	is.open(argv[1], std::ios::in);
 	
-	vector<Token> tokens = Tokenize(is);
+	std::vector<Token> tokens = Tokenize(is);
 	
-	if (argc == 3 && string(argv[2]) == "parfile") {
+	if (argc == 3 && static_cast<std::string>(argv[2]) == "ParFile") {
 	  token_parsed_file(tokens);
   }
   
-	map<string, int> name_value;
-	Block bl{name_value};
-	bl.Execution(tokens);
+	std::map<std::string, int> name_value;
+	Block main_block{name_value};
+	main_block.Execution(tokens);
 	
 	is.close();
 	return 0;

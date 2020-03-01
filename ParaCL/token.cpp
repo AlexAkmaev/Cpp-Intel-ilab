@@ -1,14 +1,9 @@
 #include "token.h"
 
 #include <sstream>
-#include <sstream>
 #include <cstdio>
 #include <stdexcept>
 #include <iostream>
-
-using namespace std;
-
-
 
 bool is_not_a_tokentype(const char& c) {
 	return (c != '+' && c != '-' && c != '*' && c != '/' &&
@@ -17,8 +12,8 @@ bool is_not_a_tokentype(const char& c) {
           c != '|' && c != ';' && c != '?' && c != '!');
 }
 
-string read_var_name(istream& is) {
-	string res;
+std::string read_var_name(std::istream& is) {  //reads the variable name from the stream
+	std::string res;
 	char c;
 	while(is.peek() != ' ' && is_not_a_tokentype(is.peek()) && is >> c) {
 		res += c;
@@ -27,63 +22,63 @@ string read_var_name(istream& is) {
 }
 
 
-vector<Token> Tokenize(istream& cl) {
-  vector<Token> tokens;
+std::vector<Token> Tokenize(std::istream& cl) {
+  std::vector<Token> tokens;
   char c;
   while (cl >> c) {
-    if (isdigit(c)) {
-      string data(1, c);
-      while (isdigit(cl.peek())) {
+    if (std::isdigit(c)) {
+      std::string data(1, c);
+      while (std::isdigit(cl.peek())) {
         data += cl.get();
       }
       tokens.push_back({data, TokenType::Data});
-/////////while
+//while
     } else if (c == 'w') {
-    	string s = "w";
+    	std::string s = "w";
     	if ((s += cl.get()) == "wh" && (s += cl.get()) == "whi" && (s += cl.get()) == "whil" && (s += cl.get()) == "while") {
         tokens.push_back({s, TokenType::While});
       } else {
-      	string var_name;
+      	std::string var_name;
       	var_name = s;
         var_name += read_var_name(cl);
         tokens.push_back({var_name, TokenType::VarName});
       }
-/////////if      
+//if      
     } else if (c == 'i') {
-    	string s = "i";
+    	std::string s = "i";
     	if ((s += cl.get()) == "if") {
         tokens.push_back({s, TokenType::If});
       } else {
-      	string var_name;
+      	std::string var_name;
         var_name = s;
         var_name += read_var_name(cl);
         tokens.push_back({var_name, TokenType::VarName});
       }
-/////////print
+//print
     } else if (c == 'p') {
-    	string s(1, c);
+    	std::string s(1, c);
     	if ((s += cl.get()) == "pr" && (s += cl.get()) == "pri" && (s += cl.get()) == "prin" && (s += cl.get()) == "print") {
         tokens.push_back({s, TokenType::Print});
 	    } else {
-	    	string var_name;
+	    	std::string var_name;
 	    	var_name = s;
 	      var_name += read_var_name(cl);
 	      tokens.push_back({var_name, TokenType::VarName});
 	    }
-////////ENDL
+//ENDL
 		} else if (c == 'E') {
-    	string s(1, c);
+    	std::string s(1, c);
     	if ((s += cl.get()) == "EN" && (s += cl.get()) == "END" && (s += cl.get()) == "ENDL") {
         tokens.push_back({s, TokenType::Endl});
 	    } else {
-	    	string var_name;
+	    	std::string var_name;
 	    	var_name = s;
 	      var_name += read_var_name(cl);
 	      tokens.push_back({var_name, TokenType::VarName});
 	    }
 		} else if (c == '"') {
-    	string str;
-    	getline(cl, str, '"');
+    	std::string str;
+    	std::getline(cl, str, '"');
     	tokens.push_back({str, TokenType::String});
 		} else if (c == '?') {
     	tokens.push_back({"?", TokenType::Scanf});
@@ -122,19 +117,19 @@ vector<Token> Tokenize(istream& cl) {
       if (cl.get() == '=') {
         tokens.push_back({"!=", TokenType::Compare_Op});
       } else {
-        throw logic_error("Unknown token 2");
+        throw std::logic_error("Unknown token 1");
       }
     } else if (c == '&') {
       if (cl.get() == '&') {
         tokens.push_back({"&&", TokenType::Compare_Op});
       } else {
-        throw logic_error("Unknown token 3");
+        throw std::logic_error("Unknown token 2");
       }
     } else if (c == '|') {
       if (cl.get() == '|') {
         tokens.push_back({"||", TokenType::Compare_Op});
       } else {
-        throw logic_error("Unknown token 4");
+        throw std::logic_error("Unknown token 3");
       }
     } else if (c == '+') {
       tokens.push_back({"+", TokenType::Arithmetic_Op});
@@ -147,7 +142,7 @@ vector<Token> Tokenize(istream& cl) {
     } else if (c == ' ') {
     	continue;
     } else {
-    	string var_name(1, c);
+    	std::string var_name(1, c);
     	var_name += read_var_name(cl);
     	tokens.push_back({var_name, TokenType::VarName});
     }
@@ -157,7 +152,7 @@ vector<Token> Tokenize(istream& cl) {
 }
 
 
-ostream& operator<< (ostream& os, const TokenType& t) {
+std::ostream& operator<< (std::ostream& os, const TokenType& t) {
 	if(t == TokenType::Logic_Op) {
 		os << "Logic_Op";
 	} else if(t == TokenType::Compare_Op) {
