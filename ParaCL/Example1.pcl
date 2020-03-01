@@ -1,0 +1,17 @@
+fst = 0;
+snd = 1;
+print "Enter iters: ";
+iters = ?;
+while (iters > 0) {
+  tmp = fst;
+  fst = snd;
+  snd = snd + tmp;
+  if ((fst != 10) || (snd >= 3)) {
+    print iters;
+    print ENDL;
+  }
+  iters = iters - 1;
+}
+
+print "snd = ";
+print snd;
