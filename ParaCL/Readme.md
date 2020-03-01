@@ -6,7 +6,8 @@ Syntax and features for the first level:
 4) print - print a number, variable, string, or line feed;
 5) ENDL - line feed.
 6) ? - read a number from the standard input stream.  
-You can compile the program using the command:  
+
+You can compile the program using the command:
 ```
 g++ main.cpp token.cpp node.cpp block.cpp
 ```
