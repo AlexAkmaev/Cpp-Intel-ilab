@@ -1,5 +1,0 @@
-fst = 5;
-snd = 2;
-thr= ?;
-result = 2*fst * snd + 3 - 24 / thr;
-print result;

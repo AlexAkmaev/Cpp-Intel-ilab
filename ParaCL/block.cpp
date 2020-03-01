@@ -46,7 +46,7 @@ void Block::Execution(const std::vector<Token>& tokens) {
 				name_value[variable_name] = value;
 			} else {
 				auto semicolon = std::find(token, it_end, Token{";", TokenType::Semicolon});
-				int value = Parse(token, semicolon);
+				int value = Expression_evaluation(token, semicolon);
 				std::string variable_name = (token - 2)->value;
 				name_value[variable_name] = value;
 		  }
@@ -75,7 +75,7 @@ void Block::Execution(const std::vector<Token>& tokens) {
 	    
 			int condition;
 			if (keyword == TokenType::While) {
-		    while (condition = Parse(token + 1, paren_right) ) {
+		    while (condition = Expression_evaluation(token + 1, paren_right) ) {
 		    	std::vector<Token> tokens_in_block(bracelet_left + 1, bracelet_right);
 		    	Block While_block_of_code{name_value};
 		    	While_block_of_code.Execution(tokens_in_block);
@@ -85,7 +85,7 @@ void Block::Execution(const std::vector<Token>& tokens) {
 		    	}
 		    }
 		  } else {
-		  	if (condition = Parse(token + 1, paren_right) ) {
+		  	if (condition = Expression_evaluation(token + 1, paren_right) ) {
 		    	std::vector<Token> tokens_in_block(bracelet_left + 1, bracelet_right);
 		    	Block If_block_of_code{name_value};
 		    	If_block_of_code.Execution(tokens_in_block);

@@ -185,7 +185,7 @@ std::ostream& operator<< (std::ostream& os, const TokenType& t) {
 		os << "Bracelet_RIGHT";
 	} else if(t == TokenType::Arithmetic_Op) {
 		os << "Arithmetic_Op";
-	}else if(t == TokenType::Semicolon) {
+	} else if(t == TokenType::Semicolon) {
 		os << "Semicolon";
 	}
 }	

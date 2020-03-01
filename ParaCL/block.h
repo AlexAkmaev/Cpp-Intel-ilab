@@ -21,6 +21,17 @@
 	7. Output: 3 4 +
 ***/
 
+
+//determines whether a minus should be added to an operation or assigned to a number
+template <class Iterator>
+bool is_negative_number(Iterator prev) {
+	if (prev->type == TokenType::Data || prev->type == TokenType::VarName ||
+		 prev->type == TokenType::Paren_RIGHT) {
+		return false;
+	}
+	return true;
+}
+
 class Block {
 public:	
   
@@ -30,7 +41,7 @@ public:
 	
 	/*** Shunting-yard algorithm ***/
 	template <class Iterator>
-	int Parse(Iterator beg, Iterator end) {
+	int Expression_evaluation(Iterator beg, Iterator end) {
 		Iterator token = beg;
 		// Empty expression
 	  if (token == end) {
@@ -62,9 +73,29 @@ public:
 	    if (val.value == "*" || val.value == "/") {
 	      PopOps(6);
 	      ops.push(std::make_shared<Op>(val.value));
-	    } else if (val.value == "+" || val.value == "-") {
+	    } else if (val.value == "+") {
 	      PopOps(5);
 	      ops.push(std::make_shared<Op>(val.value));
+	    } else if (val.value == "-") {
+	    	Iterator prev = token - 1, next = token + 1;
+	    	if (!is_negative_number(prev)) {
+		      PopOps(5);
+		      ops.push(std::make_shared<Op>(val.value));
+		    } else if (next->type == TokenType::Data) {
+		    	values.push(std::make_shared<Variable>(-atoi(next->value.c_str())));
+		    	++token;
+		    } else if (next->type == TokenType::Paren_LEFT) {
+	      	auto paren_right = find_pair_bracket(next + 1, end, TokenType::Paren_LEFT);
+	      	if (paren_right == end)
+					  throw std::logic_error("Wrong Syntax");
+	        values.push(std::make_shared<Variable>(-Expression_evaluation(next + 1, paren_right)));
+	        if ((token = paren_right) + 1 == end)
+	          break;
+	      } else {
+	      	name_value[next->value] *= -1;
+		    	values.push(std::make_shared<Variable>(name_value.at(next->value)));
+		    	++token;
+		    } 
 	    } else if (val.value == "<" || val.value == "<=" || val.value == ">" || val.value == ">=") {
 	      PopOps(4);
 	      ops.push(std::make_shared<Op>(val.value));
@@ -82,10 +113,10 @@ public:
 	      	values.push(std::make_shared<Variable>(atoi(val.value.c_str())));
 	      } else if (val.type == TokenType::Paren_LEFT) {
 	      	auto paren_right = find_pair_bracket(token + 1, end, TokenType::Paren_LEFT);
-	      	if (paren_right == end)
+	      	if (paren_right == end) 
 					  throw std::logic_error("Wrong Syntax");
-	        values.push(std::make_shared<Variable>(Parse(token + 1, paren_right)));
-	        if ((token = paren_right + 1) == end)
+	        values.push(std::make_shared<Variable>(Expression_evaluation(token + 1, paren_right)));
+	        if ((token = paren_right) + 1 == end)
 	          break;
 	      } else {
 	        values.push(std::make_shared<Variable>(name_value.at(val.value)));
