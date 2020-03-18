@@ -43,7 +43,7 @@ public:
 	template<typename U>
 	friend void __add__(SearchTree<U>& rhs, typename SearchTree<U>::_Node* node);  //auxiliary function for op+, op= and copy ctor
 	
-	_Node* remove(T data);  //auxiliary function for deleting an element with the data content from the tree
+	void remove(T data);  //auxiliary function for deleting an element with the data content from the tree
 
 };
 
@@ -218,12 +218,11 @@ typename SearchTree<T>::_Node* SearchTree<T>::__remove__(_Node* node, T data){
 }
 
 template< typename T >
-typename SearchTree<T>::_Node* SearchTree<T>::remove(T data){
+void SearchTree<T>::remove(T data){
 	if (!_root) {
   	std::cout << "Nothing to remove:(" << std::endl;
-  	return nullptr;
   } else {
-	  return __remove__(_root, data);
+	  __remove__(_root, data);
   }
 }
 
@@ -231,6 +230,6 @@ template<typename T>
 SearchTree<T>::~SearchTree(){
 	_Node* temp = _root;
 	while(_root){
-		_root = remove(_root->_value);
+		_root = __remove__(_root, _root->_value);
 	}
 }
