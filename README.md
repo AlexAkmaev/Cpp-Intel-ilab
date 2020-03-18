@@ -9,3 +9,5 @@ Contains 3 levels of tasks:
 Modified task #68 from the ProjectEuler.net. Searching for all possible combinations of triples of numbers such that the sum of the numbers in triples is the same, and from these triples a grid of numbers with an inner and outer n-gon ring is formed.  
 3. ParaCL compiler.  
 The compiler for the language ParaCL. For a more detailed description, see the project folder.
+4. Search tree.  
+Recursive implementation of the search tree with basic methods. For more information, see README in the folder.
