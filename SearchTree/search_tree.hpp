@@ -25,7 +25,7 @@ class SearchTree{
 	Node_* single_left_rotation__(Node_* &node);  //explanation of the principle before definition
 	Node_* double_left_rotation__(Node_* &node);  //explanation of the principle before definition
 	Node_* double_right_rotation__(Node_* &node);  //explanation of the principle before definition
-	int is_balanced__(Node_* root, bool isBalanced) const;
+	int is_balanced__(Node_* root, bool isBalanced) const;  //checks if tree is balanced
   
 	void inorder_traversal__(Node_* node = nullptr, int indent = 0) const;  //printing a tree with the in-order crawl
 	Node_* search__(Node_* node, T data) const;  //search for a Node_ by its content
@@ -41,7 +41,7 @@ public:
 	~SearchTree();  //dtor
 
 	Node_* get_root() const;  //getting an immutable tree root
-	bool is_balanced() const;  //checks if tree is balanced
+	bool is_balanced() const;  //auxiliary function for checking if tree is balanced
 	
 	void inorder_print(int indent = 0) const;  //auxiliary function for in-order crawl tree printing
 
@@ -85,16 +85,16 @@ typename SearchTree<T>::Node_* SearchTree<T>::get_root() const{
 
 template<typename T>
 int SearchTree<T>::get_height__(Node_* node) const {
-	return (!node ? -1 : node->height_);
+	return (!node ? 0 : node->height_);
 }
 
 /*
-        ***single right rotation***
-      y                              x
-     / \                            / \
-    x   C     -------------->      A   y
-   / \                                / \
-  A   B                              B   C
+             ***single right rotation***
+         node                            lfnode
+        /   \                            /   \
+    lfnode   C     -------------->      A    node
+    /   \                                    /  \
+   A    B                                   B   C
 */
 template<typename T>
 typename SearchTree<T>::Node_* SearchTree<T>::single_right_rotation__(Node_* &node) {
@@ -102,26 +102,26 @@ typename SearchTree<T>::Node_* SearchTree<T>::single_right_rotation__(Node_* &no
 	node->left_ = lfnode->right_;
 	lfnode->right_ = node;
 	node->height_ = std::max(get_height__(node->left_), get_height__(node->right_)) + 1;
-	lfnode->height_ = std::max(get_height__(lfnode->left_), node->height_)+1;
+	lfnode->height_ = std::max(get_height__(lfnode->left_), node->height_) + 1;
 	return lfnode;
 }
 
 /*
-       ***single left rotation***
-    x                              y
-   / \                            / \
-  A   y      ------------->      x   C
-     / \                        / \
-    B   C                      A   B
+           ***single left rotation***
+    node                                rhnode
+   /   \                                /   \
+  A   rhnode      ------------->      node   C
+       /  \                          /  \
+      B   C                         A   B
 */
 template<typename T>
 typename SearchTree<T>::Node_* SearchTree<T>::single_left_rotation__(Node_* &node) {
-	Node_* lfnode = node->right_;
-	node->right_ = lfnode->left_;
-	lfnode->left_ = node;
+	Node_* rhnode = node->right_;
+	node->right_ = rhnode->left_;
+	rhnode->left_ = node;
 	node->height_ = std::max(get_height__(node->left_), get_height__(node->right_)) + 1;
-	lfnode->height_ = std::max(get_height__(node->right_), node->height_)+1 ;
-	return lfnode;
+	rhnode->height_ = std::max(get_height__(node->right_), node->height_) + 1 ;
+	return rhnode;
 }
 
 template<typename T>
@@ -254,7 +254,8 @@ typename SearchTree<T>::Node_* SearchTree<T>::maximum(Node_* node) const{
 /*
  * Recursively searches for the desired node,
  * after which you can add an element with 
- * the date content and leave the tree balanced
+ * the date content and balances the tree if
+ * the inserted node violated the tree's AVL balance.
  */
 template< typename T >
 typename SearchTree<T>::Node_* SearchTree<T>::push__(Node_* node, T data) {
@@ -315,7 +316,9 @@ SearchTree<T> operator+(const SearchTree<T>& rhs, const SearchTree<T>& lhs) {  /
 /*
  * Recursively searches for the node to delete
  * and replaces it with the minimum node in the
- * right_ subtree to keep the entire tree balanced
+ * right_ subtree to keep the entire tree data 
+ * balanced and balances the tree if the deleted
+ * node violated the tree's ABL height balance.
 */
 template< typename T >
 typename SearchTree<T>::Node_* SearchTree<T>::remove__(Node_* head, T data){
@@ -347,15 +350,13 @@ typename SearchTree<T>::Node_* SearchTree<T>::remove__(Node_* head, T data){
 		if(data > head->left_->value_){
 			return single_right_rotation__(head);
 		}else{
-			head->left_ = single_left_rotation__(head->left_);
-			return single_right_rotation__(head);
+			return double_right_rotation__(head);
 		}
 	}else if(balance_indicator < -1){
 		if(data < head->right_->value_){
 			return single_left_rotation__(head);
 		}else{
-			head->right_ = single_right_rotation__(head->right_);
-			return single_left_rotation__(head);
+			return double_left_rotation__(head);
 		}
 	}
 	
