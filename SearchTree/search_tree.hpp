@@ -19,27 +19,29 @@ class SearchTree{
 	};
 	
 	Node_* root_ = nullptr;  //tree roots
-	
-	Node_* singleRightRotate__(Node_* &node);
-	Node_* singleLeftRotate__(Node_* &node);
-	Node_* doubleLeftRotate__(Node_* &node);
-	Node_* doubleRightRotate__(Node_* &node);
+	int get_height__(Node_* node) const;  //get the height value from node
+
+	Node_* single_right_rotation__(Node_* &node);  //explanation of the principle before definition
+	Node_* single_left_rotation__(Node_* &node);  //explanation of the principle before definition
+	Node_* double_left_rotation__(Node_* &node);  //explanation of the principle before definition
+	Node_* double_right_rotation__(Node_* &node);  //explanation of the principle before definition
+	int is_balanced__(Node_* root, bool isBalanced) const;
   
 	void inorder_traversal__(Node_* node = nullptr, int indent = 0) const;  //printing a tree with the in-order crawl
 	Node_* search__(Node_* node, T data) const;  //search for a Node_ by its content
 	Node_* push__(Node_* node, T data);  //add an element with data content to the tree
 	Node_* remove__(Node_* node, T data);  //delete an element with the data content from the tree
-	void make_empty__();  //deletes a tree
-	void makeEmpty(Node_* node);
+	void makeEmpty(Node_* node); //deletes a tree
+	void make_empty__();  //auxiliary function for deleting a tree
 	
 public:
 	explicit SearchTree();  //ctor
 	SearchTree(const SearchTree<T>& rhs);  //copy ctor
 	SearchTree<T>& operator=(const SearchTree<T>& rhs);  //op=
 	~SearchTree();  //dtor
-	
+
 	Node_* get_root() const;  //getting an immutable tree root
-	int get_height(Node_* node) const;
+	bool is_balanced() const;  //checks if tree is balanced
 	
 	void inorder_print(int indent = 0) const;  //auxiliary function for in-order crawl tree printing
 
@@ -82,40 +84,80 @@ typename SearchTree<T>::Node_* SearchTree<T>::get_root() const{
 }
 
 template<typename T>
-int SearchTree<T>::get_height(Node_* node) const {
+int SearchTree<T>::get_height__(Node_* node) const {
 	return (!node ? -1 : node->height_);
 }
 
-template< typename T >
-typename SearchTree<T>::Node_* SearchTree<T>::singleRightRotate__(Node_* &node) {
+/*
+        ***single right rotation***
+      y                              x
+     / \                            / \
+    x   C     -------------->      A   y
+   / \                                / \
+  A   B                              B   C
+*/
+template<typename T>
+typename SearchTree<T>::Node_* SearchTree<T>::single_right_rotation__(Node_* &node) {
 	Node_* lfnode = node->left_;
 	node->left_ = lfnode->right_;
 	lfnode->right_ = node;
-	node->height_ = std::max(get_height(node->left_), get_height(node->right_))+1;
-	lfnode->height_ = std::max(get_height(lfnode->left_), node->height_)+1;
+	node->height_ = std::max(get_height__(node->left_), get_height__(node->right_)) + 1;
+	lfnode->height_ = std::max(get_height__(lfnode->left_), node->height_)+1;
 	return lfnode;
 }
 
-template< typename T >
-typename SearchTree<T>::Node_* SearchTree<T>::singleLeftRotate__(Node_* &node) {
+/*
+       ***single left rotation***
+    x                              y
+   / \                            / \
+  A   y      ------------->      x   C
+     / \                        / \
+    B   C                      A   B
+*/
+template<typename T>
+typename SearchTree<T>::Node_* SearchTree<T>::single_left_rotation__(Node_* &node) {
 	Node_* lfnode = node->right_;
 	node->right_ = lfnode->left_;
 	lfnode->left_ = node;
-	node->height_ = std::max(get_height(node->left_), get_height(node->right_))+1;
-	lfnode->height_ = std::max(get_height(node->right_), node->height_)+1 ;
+	node->height_ = std::max(get_height__(node->left_), get_height__(node->right_)) + 1;
+	lfnode->height_ = std::max(get_height__(node->right_), node->height_)+1 ;
 	return lfnode;
 }
 
-template< typename T >
-typename SearchTree<T>::Node_* SearchTree<T>::doubleLeftRotate__(Node_* &node) {
-	node->right_ = singleRightRotate__(node->right_);
-	return singleLeftRotate__(node);
+template<typename T>
+typename SearchTree<T>::Node_* SearchTree<T>::double_left_rotation__(Node_* &node) {
+	node->right_ = single_right_rotation__(node->right_);
+	return single_left_rotation__(node);
 }
 
-template< typename T >
-typename SearchTree<T>::Node_* SearchTree<T>::doubleRightRotate__(Node_* &node) {
-	node->left_ = singleLeftRotate__(node->left_);
-	return singleRightRotate__(node);
+template<typename T>
+typename SearchTree<T>::Node_* SearchTree<T>::double_right_rotation__(Node_* &node) {
+	node->left_ = single_left_rotation__(node->left_);
+	return single_right_rotation__(node);
+}
+
+template<typename T>
+int SearchTree<T>::is_balanced__(Node_* root, bool isBalanced) const {
+	if (!root || !isBalanced)
+		return 0;
+	
+	int left_height = is_balanced__(root->left_, isBalanced);
+	int right_height = is_balanced__(root->right_, isBalanced);
+	
+	// tree is unbalanced if absolute difference between height of
+	// its left subtree and right subtree is more than 1
+	if (abs(left_height - right_height) > 1)
+		isBalanced = false;
+	
+	// return height of subtree rooted at current node
+	return std::max(left_height, right_height) + 1;
+}
+
+template<typename T>
+bool SearchTree<T>::is_balanced() const {
+	bool isBalanced = true;
+	is_balanced__(root_, isBalanced);
+	return isBalanced;
 }
 
 template<typename T>
@@ -194,11 +236,11 @@ bool SearchTree<T>::exists(T data) const{
 template< typename T >
 typename SearchTree<T>::Node_* SearchTree<T>::minimum(Node_* node) const{
 	if (!node)
-	    return nullptr;
+		return nullptr;
 	else if(!node->left_)
-	    return node;
+		return node;
 	else
-	    return minimum(node->left_);
+		return minimum(node->left_);
 }
 
 template< typename T >
@@ -214,57 +256,29 @@ typename SearchTree<T>::Node_* SearchTree<T>::maximum(Node_* node) const{
  * after which you can add an element with 
  * the date content and leave the tree balanced
  */
-//template< typename T >
-//typename SearchTree<T>::Node_* SearchTree<T>::push__(Node_* node, T data){
-//	if (!node) 
-//		return new Node_(data);
-//	if (data < node->value_)
-//		node->left_ = push__(node->left_, data);
-//	else
-//		node->right_ = push__(node->right_, data);
-//	return balance_the_tree__(node);
-//}
-//template< typename T >
-//typename SearchTree<T>::Node_* SearchTree<T>::push__(Node_* node, T data){
-//	Node_* tmp = new Node_(data);
-//	if(!root_) {
-//		root_ = tmp;
-//		return root_;
-//	} else {
-//  	if(!node) {
-//      return tmp;
-//  	}
-//  	else if(data < node->value_)
-//      node->left_ = push__(node->left_, data);
-//  	else if(data > node->value_)
-//      node->right_ = push__(node->right_, data);
-//  	delete tmp;
-//  	return balance_the_tree__(node);
-//  }
-//}
 template< typename T >
 typename SearchTree<T>::Node_* SearchTree<T>::push__(Node_* node, T data) {
 	if(!node) {
 		node = new Node_(data);
 	} else if(data < node->value_) {
 		node->left_ = push__(node->left_, data);
-		if(get_height(node->left_) - get_height(node->right_) == 2) {
+		if(get_height__(node->left_) - get_height__(node->right_) == 2) {
 			if(data < node->left_->value_)
-				node = singleRightRotate__(node);
+				node = single_right_rotation__(node);
 			else
-				node = doubleRightRotate__(node);
+				node = double_right_rotation__(node);
 		}
 	} else if(data > node->value_) {
 		node->right_ = push__(node->right_, data);
-		if(get_height(node->right_) - get_height(node->left_) == 2) {
+		if(get_height__(node->right_) - get_height__(node->left_) == 2) {
 			if(data > node->right_->value_)
-				node = singleLeftRotate__(node);
+				node = single_left_rotation__(node);
 			else
-				node = doubleLeftRotate__(node);
+				node = double_left_rotation__(node);
 		}
 	}
 	
-	node->height_ = std::max(get_height(node->left_), get_height(node->right_)) + 1;
+	node->height_ = std::max(get_height__(node->left_), get_height__(node->right_)) + 1;
 	return node;
 }
 
@@ -292,6 +306,8 @@ void merge__(SearchTree<T>& rhs, typename SearchTree<T>::Node_* node) {
 template<typename T>
 SearchTree<T> operator+(const SearchTree<T>& rhs, const SearchTree<T>& lhs) {  //operation of adding the rhs tree to the current one
 	SearchTree<T> ans(rhs);
+	if (!ans.get_root() && !lhs.get_root())
+		return ans;
 	merge__(ans, lhs.get_root());
 	return ans;
 }
@@ -302,70 +318,49 @@ SearchTree<T> operator+(const SearchTree<T>& rhs, const SearchTree<T>& lhs) {  /
  * right_ subtree to keep the entire tree balanced
 */
 template< typename T >
-typename SearchTree<T>::Node_* SearchTree<T>::remove__(Node_* node, T data) {
-	Node_* temp;
-	if(!node)
-		return node;
-	
-	else if(data < node->value_)
-		node->left_ = remove__(node->left_, data);
-	else if(data > node->value_)
-		node->right_ = remove__(node->right_, data);
-	else if(node->left_ && node->right_) {
-		temp = minimum(node->right_);
-		node->value_ = temp->value_;
-		node->right_ = remove__(node->right_, node->value_);
-	} else {
-		temp = node;
-		if(!node->left_)
-			node = node->right_;
-		else if(!node->right_)
-			node = node->left_;
-		delete temp;
+typename SearchTree<T>::Node_* SearchTree<T>::remove__(Node_* head, T data){
+	if(!head) return head;
+	if(data < head->value_){
+		head->left_ = remove__(head->left_, data);
+	}else if(data > head->value_) {
+		head->right_ = remove__(head->right_, data);
+	}else{
+		Node_* rhnode = head->right_;
+		if(head->right_== nullptr){
+			Node_* lfnode = head->left_;
+			delete(head);
+			head = lfnode;
+		}else if(!head->left_){
+			delete(head);
+			head = rhnode;
+		}else{
+			rhnode = minimum(head);
+			head->value_ = rhnode->value_;
+			head->right_ = remove__(head->right_, rhnode->value_);
+		}
 	}
-	if(!node)
-		return node;
+	if(!head) return head;
 	
-	node->height_ = std::max(get_height(node->left_), get_height(node->right_)) + 1;
-	
-	//if node is unbalanced
-	if(get_height(node->left_) - get_height(node->right_) == 2) {
-		if(get_height(node->left_->left_) - get_height(node->left_->right_) == 1)
-			return singleLeftRotate__(node);
-		else
-			return doubleLeftRotate__(node);
-	} else if(get_height(node->right_) - get_height(node->left_) == 2) {
-		if(get_height(node->right_->right_) - get_height(node->right_->left_) == 1)
-			return singleRightRotate__(node);
-		else
-			return doubleRightRotate__(node);
+	head->height_ = std::max(get_height__(head->left_), get_height__(head->right_)) + 1;
+	int balance_indicator = get_height__(head->left_) - get_height__(head->right_);
+	if(balance_indicator > 1) {
+		if(data > head->left_->value_){
+			return single_right_rotation__(head);
+		}else{
+			head->left_ = single_left_rotation__(head->left_);
+			return single_right_rotation__(head);
+		}
+	}else if(balance_indicator < -1){
+		if(data < head->right_->value_){
+			return single_left_rotation__(head);
+		}else{
+			head->right_ = single_right_rotation__(head->right_);
+			return single_left_rotation__(head);
+		}
 	}
 	
-	return node;
+	return head;
 }
-
-//template< typename T >
-//typename SearchTree<T>::Node_* SearchTree<T>::remove__(Node_* node, T data){
-//  if(!node)
-//    return node;
-//  if (data < node->value_)
-//    node->left_ = remove__(node->left_, data);
-//  else if (data > node->value_)
-//    node->right_ = remove__(node->right_, data);
-//  else if (node->left_ && node->right_){
-//    node->value_ = minimum(node->right_)->value_;
-//    node->right_ = remove__(node->right_, node->value_);
-//  }
-//  else{
-//    if (node->left_)
-//      node = node->left_;
-//    else if (node->right_)
-//      node = node->right_;
-//    else
-//      node = nullptr;
-//  }
-//  return (node);
-//}
 
 template< typename T >
 void SearchTree<T>::remove(T data){
