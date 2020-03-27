@@ -10,7 +10,6 @@
 template<typename T>
 class SearchTree{
 	struct Node_{
-		explicit Node_() = delete;
 		explicit Node_(const T& data) : value_(data) {}
 		
 		T value_;
@@ -19,37 +18,38 @@ class SearchTree{
 	};
 	
 	Node_* root_ = nullptr;  //tree roots
-	int get_height__(Node_* node) const;  //get the height value from node
+	int get_height__(Node_* node) const noexcept;  //get the height value from node
 
 	Node_* single_right_rotation__(Node_* &node);  //explanation of the principle before definition
 	Node_* single_left_rotation__(Node_* &node);  //explanation of the principle before definition
 	Node_* double_left_rotation__(Node_* &node);  //explanation of the principle before definition
 	Node_* double_right_rotation__(Node_* &node);  //explanation of the principle before definition
-	int is_balanced__(Node_* root, bool isBalanced) const;  //checks if tree is balanced
+	int is_balanced__(Node_* root, bool& isBalanced) const noexcept;  //checks if tree is balanced
   
-	void inorder_traversal__(Node_* node = nullptr, int indent = 0) const;  //printing a tree with the in-order crawl
-	Node_* search__(Node_* node, T data) const;  //search for a Node_ by its content
+	void inorder_traversal__(Node_* node = nullptr, int indent = 0) const noexcept;  //printing a tree with the in-order crawl
+	Node_* search__(Node_* node, T data) const noexcept;  //search for a Node_ by its content
 	Node_* push__(Node_* node, T data);  //add an element with data content to the tree
 	Node_* remove__(Node_* node, T data);  //delete an element with the data content from the tree
+//	Node_* remove__(T x, Node_* t);
 	void makeEmpty(Node_* node); //deletes a tree
 	void make_empty__();  //auxiliary function for deleting a tree
 	
 public:
-	explicit SearchTree();  //ctor
-	SearchTree(const SearchTree<T>& rhs);  //copy ctor
-	SearchTree<T>& operator=(const SearchTree<T>& rhs);  //op=
-	~SearchTree();  //dtor
+	SearchTree() noexcept;
+	SearchTree(const SearchTree<T>& rhs);
+	SearchTree<T>& operator=(const SearchTree<T>& rhs);
+	~SearchTree();
 
-	Node_* get_root() const;  //getting an immutable tree root
-	bool is_balanced() const;  //auxiliary function for checking if tree is balanced
+	Node_* get_root() const noexcept;  //getting an immutable tree root
+	bool is_balanced() const noexcept;  //auxiliary function for checking if tree is balanced
 	
-	void inorder_print(int indent = 0) const;  //auxiliary function for in-order crawl tree printing
+	void inorder_print(int indent = 0) const noexcept;  //auxiliary function for in-order crawl tree printing
 
-	Node_* search(T data) const;  //auxiliary function for searching a Node_ by its content
-	bool exists(T data) const;  //is tree has data content?
+	Node_* search(T data) const noexcept;  //auxiliary function for searching a Node_ by its content
+	bool exists(T data) const noexcept;  //is tree has data content?
 
-	Node_* minimum(Node_* node) const;  //searches for the minimum in a subtree with the given root
-	Node_* maximum(Node_* node) const;  //searches for the maximum in a subtree with the given root
+	Node_* minimum(Node_* node) const noexcept;  //searches for the minimum in a subtree with the given root
+	Node_* maximum(Node_* node) const noexcept;  //searches for the maximum in a subtree with the given root
 	
 	void push(T data); //auxiliary function for adding an element with data content to the tree
 	
@@ -61,7 +61,7 @@ public:
 };
 
 template<typename T>
-SearchTree<T>::SearchTree() = default;
+SearchTree<T>::SearchTree() noexcept = default;
 
 template<typename T>
 SearchTree<T>::SearchTree(const SearchTree& rhs) {
@@ -79,12 +79,12 @@ SearchTree<T>& SearchTree<T>::operator=(const SearchTree<T>& rhs) {
 }
 
 template<typename T>
-typename SearchTree<T>::Node_* SearchTree<T>::get_root() const{
+typename SearchTree<T>::Node_* SearchTree<T>::get_root() const noexcept{
   return root_;
 }
 
 template<typename T>
-int SearchTree<T>::get_height__(Node_* node) const {
+int SearchTree<T>::get_height__(Node_* node) const noexcept{
 	return (!node ? 0 : node->height_);
 }
 
@@ -98,12 +98,15 @@ int SearchTree<T>::get_height__(Node_* node) const {
 */
 template<typename T>
 typename SearchTree<T>::Node_* SearchTree<T>::single_right_rotation__(Node_* &node) {
-	Node_* lfnode = node->left_;
-	node->left_ = lfnode->right_;
-	lfnode->right_ = node;
-	node->height_ = std::max(get_height__(node->left_), get_height__(node->right_)) + 1;
-	lfnode->height_ = std::max(get_height__(lfnode->left_), node->height_) + 1;
-	return lfnode;
+	if (node->left_) {
+		Node_* lfnode = node->left_;
+		node->left_ = lfnode->right_;
+		lfnode->right_ = node;
+		node->height_ = std::max(get_height__(node->left_), get_height__(node->right_)) + 1;
+		lfnode->height_ = std::max(get_height__(lfnode->left_), node->height_) + 1;
+		return lfnode;
+	}
+	return node;
 }
 
 /*
@@ -116,12 +119,15 @@ typename SearchTree<T>::Node_* SearchTree<T>::single_right_rotation__(Node_* &no
 */
 template<typename T>
 typename SearchTree<T>::Node_* SearchTree<T>::single_left_rotation__(Node_* &node) {
-	Node_* rhnode = node->right_;
-	node->right_ = rhnode->left_;
-	rhnode->left_ = node;
-	node->height_ = std::max(get_height__(node->left_), get_height__(node->right_)) + 1;
-	rhnode->height_ = std::max(get_height__(node->right_), node->height_) + 1 ;
-	return rhnode;
+	if (node->right_) {
+		Node_* rhnode = node->right_;
+		node->right_ = rhnode->left_;
+		rhnode->left_ = node;
+		node->height_ = std::max(get_height__(node->left_), get_height__(node->right_)) + 1;
+		rhnode->height_ = std::max(get_height__(node->right_), node->height_) + 1 ;
+		return rhnode;
+	}
+	return node;
 }
 
 template<typename T>
@@ -137,7 +143,7 @@ typename SearchTree<T>::Node_* SearchTree<T>::double_right_rotation__(Node_* &no
 }
 
 template<typename T>
-int SearchTree<T>::is_balanced__(Node_* root, bool isBalanced) const {
+int SearchTree<T>::is_balanced__(Node_* root, bool& isBalanced) const noexcept{
 	if (!root || !isBalanced)
 		return 0;
 	
@@ -146,22 +152,24 @@ int SearchTree<T>::is_balanced__(Node_* root, bool isBalanced) const {
 	
 	// tree is unbalanced if absolute difference between height of
 	// its left subtree and right subtree is more than 1
-	if (abs(left_height - right_height) > 1)
+//	if (abs(left_height - right_height) > 1)
+	if (abs(get_height__(root->left_) - get_height__(root->right_)) > 1)
 		isBalanced = false;
 	
 	// return height of subtree rooted at current node
-	return std::max(left_height, right_height) + 1;
+//	return std::max(left_height, right_height) + 1;
+	return std::max(get_height__(root->left_), get_height__(root->right_)) + 1;
 }
 
 template<typename T>
-bool SearchTree<T>::is_balanced() const {
+bool SearchTree<T>::is_balanced() const noexcept{
 	bool isBalanced = true;
 	is_balanced__(root_, isBalanced);
 	return isBalanced;
 }
 
 template<typename T>
-void SearchTree<T>::inorder_traversal__(Node_* node, int indent) const{
+void SearchTree<T>::inorder_traversal__(Node_* node, int indent) const noexcept{
   if(node) {
 		if(node->right_) {
 		  inorder_traversal__(node->right_, indent + 4);
@@ -179,7 +187,7 @@ void SearchTree<T>::inorder_traversal__(Node_* node, int indent) const{
 }
 
 template< typename T >
-void SearchTree<T>::inorder_print(int indent) const{
+void SearchTree<T>::inorder_print(int indent) const noexcept{
 	if (!root_) {
 		std::cout << "Empty tree:(" << std::endl;
 	} else {
@@ -195,7 +203,7 @@ void SearchTree<T>::inorder_print(int indent) const{
  * it goes to the right_, otherwise to the left_.
 */
 template< typename T >
-typename SearchTree<T>::Node_* SearchTree<T>::search__(Node_* node, T data) const{
+typename SearchTree<T>::Node_* SearchTree<T>::search__(Node_* node, T data) const noexcept{
 	bool found = false;
 	while (node && !found) {
 		if (data == node->value_) { 
@@ -217,7 +225,7 @@ typename SearchTree<T>::Node_* SearchTree<T>::search__(Node_* node, T data) cons
 }
 
 template< typename T >
-typename SearchTree<T>::Node_* SearchTree<T>::search(T data) const{
+typename SearchTree<T>::Node_* SearchTree<T>::search(T data) const noexcept{
   if (!root_) {
   	std::cout << "Nothing to search:(" << std::endl;
   	return nullptr;
@@ -227,14 +235,12 @@ typename SearchTree<T>::Node_* SearchTree<T>::search(T data) const{
 }
 
 template< typename T >
-bool SearchTree<T>::exists(T data) const{
-  if (search(data))
-  	return true;
- 	return false;
+bool SearchTree<T>::exists(T data) const noexcept{
+ 	return search(data);
 }
 
 template< typename T >
-typename SearchTree<T>::Node_* SearchTree<T>::minimum(Node_* node) const{
+typename SearchTree<T>::Node_* SearchTree<T>::minimum(Node_* node) const noexcept{
 	if (!node)
 		return nullptr;
 	else if(!node->left_)
@@ -244,7 +250,7 @@ typename SearchTree<T>::Node_* SearchTree<T>::minimum(Node_* node) const{
 }
 
 template< typename T >
-typename SearchTree<T>::Node_* SearchTree<T>::maximum(Node_* node) const{
+typename SearchTree<T>::Node_* SearchTree<T>::maximum(Node_* node) const noexcept{
   if (!node->right_)
     return node;
   else

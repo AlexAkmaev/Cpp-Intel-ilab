@@ -3,7 +3,7 @@
 #include <ctime>
 using namespace std;
 
-const int amount_of_data = 3000;
+const int amount_of_data = 10000;
 const int peak_value = 5*amount_of_data;
 
 int main() {

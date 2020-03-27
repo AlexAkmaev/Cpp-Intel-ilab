@@ -49,7 +49,9 @@ void Test_remove() {
 	while(tree_size > limiter) {
 		int idx = rand() % (tree_data.size() - 1);
 		tree.remove(tree_data[idx]);
+		tree_data.erase(tree_data.begin() + idx);
 		--tree_size;
+		if (!tree.is_balanced()) tree.inorder_print();
 		ASSERT(tree.is_balanced());
 	}
 	std::cin.clear();
