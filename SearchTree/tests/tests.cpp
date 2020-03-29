@@ -34,6 +34,42 @@ void Test_exists() {
 	cin.seekg(0, std::ios::beg);
 }
 
+void Test_copy_ctor() {
+	SearchTree<int> tree;
+	vector<int> tree_data;
+	int data;
+	while(std::cin >> data) {
+		tree.push(data);
+		tree_data.push_back(data);
+	}
+	
+	SearchTree<int> copy_tree(tree);
+	for(const int& i : tree_data) {
+		ASSERT(copy_tree.exists(i));
+	}
+	
+	std::cin.clear();
+	cin.seekg(0, std::ios::beg);
+}
+
+void Test_assignment_op() {
+	SearchTree<int> tree;
+	vector<int> tree_data;
+	int data;
+	while(std::cin >> data) {
+		tree.push(data);
+		tree_data.push_back(data);
+	}
+	
+	SearchTree<int> copy_tree = tree;
+	for(const int& i : tree_data) {
+		ASSERT(copy_tree.exists(i));
+	}
+	
+	std::cin.clear();
+	cin.seekg(0, std::ios::beg);
+}
+
 void Test_remove() {
 	SearchTree<int> tree;
 	vector<int> tree_data;
@@ -84,6 +120,8 @@ int main() {
   TestRunner tr;
   RUN_TEST(tr, Test_push);
   RUN_TEST(tr, Test_exists);
+  RUN_TEST(tr, Test_copy_ctor);
+  RUN_TEST(tr, Test_assignment_op);
   RUN_TEST(tr, Test_remove);
   RUN_TEST(tr, Test_addition_op);
   return 0;

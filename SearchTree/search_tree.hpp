@@ -174,10 +174,10 @@ void SearchTree<T>::inorder_traversal__(Node_* node, int indent) const noexcept{
 		if(node->right_) {
 		  inorder_traversal__(node->right_, indent + 4);
 		}
-		if (indent) {
+		if(indent) {
 		  std::cout << std::setw(indent) << ' ';
 		}
-		if (node->right_) std::cout<<" /\n" << std::setw(indent) << ' ';
+		if(node->right_) std::cout<<" /\n" << std::setw(indent) << ' ';
 		  std::cout<< node->value_ << "\n ";
 		if(node->left_) {
 		  std::cout << std::setw(indent) << ' ' << " \\\n";
@@ -206,19 +206,19 @@ template< typename T >
 typename SearchTree<T>::Node_* SearchTree<T>::search__(Node_* node, T data) const noexcept{
 	bool found = false;
 	while (node && !found) {
-		if (data == node->value_) { 
+		if(data == node->value_) { 
 			found = true;
 			break; 
-		} else if (data < node->value_) {
-			if (!node->left_) break;
+		} else if(data < node->value_) {
+			if(!node->left_) break;
 			node = node->left_;
 		} else {
-			if (!node->right_) break; 
+			if(!node->right_) break; 
 			node = node->right_;
 		}
 	}
 	
-	if (found) 
+	if(found) 
 		return node;
 	else 
 		return nullptr;
@@ -251,7 +251,7 @@ typename SearchTree<T>::Node_* SearchTree<T>::minimum(Node_* node) const noexcep
 
 template< typename T >
 typename SearchTree<T>::Node_* SearchTree<T>::maximum(Node_* node) const noexcept{
-  if (!node->right_)
+  if(!node->right_)
     return node;
   else
     return maximum(node->right_);
@@ -313,7 +313,7 @@ void merge__(SearchTree<T>& rhs, typename SearchTree<T>::Node_* node) {
 template<typename T>
 SearchTree<T> operator+(const SearchTree<T>& rhs, const SearchTree<T>& lhs) {  //operation of adding the rhs tree to the current one
 	SearchTree<T> ans(rhs);
-	if (!ans.get_root() && !lhs.get_root())
+	if(!ans.get_root() && !lhs.get_root())
 		return ans;
 	merge__(ans, lhs.get_root());
 	return ans;
