@@ -61,7 +61,16 @@ void Test_assignment_op() {
 		tree_data.push_back(data);
 	}
 	
-	SearchTree<int> copy_tree = tree;
+	SearchTree<int> copy_tree;
+	int limiter = tree_data.size() * 0.9;
+	int peak_value = tree_data.size() * 9;
+	srand(time(nullptr));
+	for(int i = 0; i < limiter; ++i) {
+		data = rand() % peak_value;
+		copy_tree.push(data);
+	}
+	
+	copy_tree = tree;
 	for(const int& i : tree_data) {
 		ASSERT(copy_tree.exists(i));
 	}
@@ -87,7 +96,6 @@ void Test_remove() {
 		tree.remove(tree_data[idx]);
 		tree_data.erase(tree_data.begin() + idx);
 		--tree_size;
-		if (!tree.is_balanced()) tree.inorder_print();
 		ASSERT(tree.is_balanced());
 	}
 	std::cin.clear();
