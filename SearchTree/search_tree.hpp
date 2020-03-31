@@ -6,6 +6,7 @@
 #include <queue>
 #include <algorithm>
 #include <iomanip>
+#include <utility>
 
 /*AVL search tree*/
 template<typename T>
@@ -22,10 +23,10 @@ class SearchTree final{
 	int get_height__(Node_* node) const noexcept;  //get the height value from node
 	int get_balance__(Node_* node) const noexcept;  //get the balance factor from node
 
-	Node_* single_right_rotation__(Node_* &node);  //explanation of the principle before definition
-	Node_* single_left_rotation__(Node_* &node);  //explanation of the principle before definition
-	Node_* double_left_rotation__(Node_* &node);  //explanation of the principle before definition
-	Node_* double_right_rotation__(Node_* &node);  //explanation of the principle before definition
+	Node_* single_right_rotation__(Node_* &node) noexcept;  //explanation of the principle before definition
+	Node_* single_left_rotation__(Node_* &node) noexcept;  //explanation of the principle before definition
+	Node_* double_left_rotation__(Node_* &node) noexcept;  //explanation of the principle before definition
+	Node_* double_right_rotation__(Node_* &node) noexcept;  //explanation of the principle before definition
   
 	void inorder_traversal__(Node_* node = nullptr, int indent = 0) const noexcept;  //printing a tree with the in-order crawl
 	Node_* search__(Node_* node, T data) const noexcept;  //search for a Node_ by its content
@@ -35,8 +36,10 @@ class SearchTree final{
 	
 public:
 	SearchTree();
-	SearchTree(const SearchTree<T>& rhs);
-	SearchTree<T>& operator=(const SearchTree<T>& rhs);
+	SearchTree(const SearchTree& rhs);
+	SearchTree(SearchTree&& rhs) noexcept;
+	SearchTree<T>& operator=(const SearchTree& rhs);
+	SearchTree<T>& operator=(SearchTree&& rhs) noexcept;
 	~SearchTree() noexcept;
 
 	Node_* get_root() const noexcept;  //getting an immutable tree root
@@ -53,9 +56,9 @@ public:
 	void push(T data); //auxiliary function for adding an element with data content to the tree
 	
 	template<typename U>
-	friend void merge__(SearchTree<U>& rhs, typename SearchTree<U>::Node_* node);  //auxiliary function for op+, op= and copy ctor
+	friend void merge__(SearchTree<U>& lhs, typename SearchTree<U>::Node_* node);  //auxiliary function for op+, op= and copy ctor
 	
-	void remove(T data);  //auxiliary function for deleting an element with the data content from the tree
+	void remove(T data) noexcept;  //auxiliary function for deleting an element with the data content from the tree
 
 };
 
@@ -68,12 +71,29 @@ SearchTree<T>::SearchTree(const SearchTree& rhs) {
 }
 
 template<typename T>
-SearchTree<T>& SearchTree<T>::operator=(const SearchTree<T>& rhs) {
-	if (rhs.get_root() == root_)
+SearchTree<T>::SearchTree(SearchTree&& rhs) noexcept{
+	root_ = rhs.root_;
+	rhs.root_ = nullptr;
+}
+
+template<typename T>
+SearchTree<T>& SearchTree<T>::operator=(const SearchTree& rhs) {
+	if (this == &rhs)
 		return *this;
 
 	make_empty__();
 	merge__(*this, rhs.get_root());
+	return *this;
+}
+
+template<typename T>
+SearchTree<T>& SearchTree<T>::operator=(SearchTree&& rhs) noexcept{
+	if (this == &rhs)
+		return *this;
+
+	make_empty__();
+	root_ = rhs.root_;
+	rhs.root_ = nullptr;
 	return *this;
 }
 
@@ -101,7 +121,7 @@ int SearchTree<T>::get_balance__(Node_* node) const noexcept{
    A    B                                   B   C
 */
 template<typename T>
-typename SearchTree<T>::Node_* SearchTree<T>::single_right_rotation__(Node_* &node) {
+typename SearchTree<T>::Node_* SearchTree<T>::single_right_rotation__(Node_* &node) noexcept{
 	if(node->left_) {
 		Node_* lfnode = node->left_;
 		node->left_ = lfnode->right_;
@@ -122,7 +142,7 @@ typename SearchTree<T>::Node_* SearchTree<T>::single_right_rotation__(Node_* &no
       B   C                         A   B
 */
 template<typename T>
-typename SearchTree<T>::Node_* SearchTree<T>::single_left_rotation__(Node_* &node) {
+typename SearchTree<T>::Node_* SearchTree<T>::single_left_rotation__(Node_* &node) noexcept{
 	if(node->right_) {
 		Node_* rhnode = node->right_;
 		node->right_ = rhnode->left_;
@@ -135,13 +155,13 @@ typename SearchTree<T>::Node_* SearchTree<T>::single_left_rotation__(Node_* &nod
 }
 
 template<typename T>
-typename SearchTree<T>::Node_* SearchTree<T>::double_left_rotation__(Node_* &node) {
+typename SearchTree<T>::Node_* SearchTree<T>::double_left_rotation__(Node_* &node) noexcept{
 	node->right_ = single_right_rotation__(node->right_);
 	return single_left_rotation__(node);
 }
 
 template<typename T>
-typename SearchTree<T>::Node_* SearchTree<T>::double_right_rotation__(Node_* &node) {
+typename SearchTree<T>::Node_* SearchTree<T>::double_right_rotation__(Node_* &node) noexcept{
 	node->left_ = single_left_rotation__(node->left_);
 	return single_right_rotation__(node);
 }
@@ -233,6 +253,7 @@ typename SearchTree<T>::Node_* SearchTree<T>::search(T data) const noexcept{
 
 template< typename T >
 bool SearchTree<T>::exists(T data) const noexcept{
+	if(!root_) return false;
  	return search(data);
 }
 
@@ -292,14 +313,14 @@ void SearchTree<T>::push(T data){
 }
 
 template< typename T >
-void merge__(SearchTree<T>& rhs, typename SearchTree<T>::Node_* node) {
+void merge__(SearchTree<T>& lhs, typename SearchTree<T>::Node_* node) {
 	using pnode_t = typename SearchTree<T>::Node_*;
 	std::stack<pnode_t> tree_stack;
 	tree_stack.push(node);
 	while(!tree_stack.empty()) {
 		node = tree_stack.top();
 		tree_stack.pop();
-		rhs.push(node->value_);
+		lhs.push(node->value_);
 		if(node->right_)
 			tree_stack.push(node->right_);
 		if(node->left_)
@@ -368,7 +389,7 @@ typename SearchTree<T>::Node_* SearchTree<T>::remove__(Node_* head, T data) noex
 }
 
 template< typename T >
-void SearchTree<T>::remove(T data){
+void SearchTree<T>::remove(T data) noexcept{
 	if(!root_) {
   	std::cout << "Nothing to remove:(" << std::endl;
   } else {
@@ -400,4 +421,5 @@ void SearchTree<T>::make_empty__() noexcept{
 template<typename T>
 SearchTree<T>::~SearchTree() noexcept{
 	make_empty__();
+	delete root_;
 }

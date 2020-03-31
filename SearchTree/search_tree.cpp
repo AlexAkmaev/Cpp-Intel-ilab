@@ -33,6 +33,8 @@ int main(){
 	histree.push(94);
 	histree.push(8);
 	histree.push(7);
+	histree.push(7);
+	histree.push(7);
 
 	std::cout << "\n***inorder_print  mytree***\n";
 	mytree.inorder_print();
@@ -45,12 +47,12 @@ int main(){
 	
 	if (ourtree.exists(50))
 	  std::cout << "50 exists!" << std::endl;
-  ourtree.remove(50);
-  ourtree.remove(300);
-  ourtree.remove(200);
-  ourtree.remove(101);
-  ourtree.remove(250);
-  ourtree.remove(170);
+	ourtree.remove(50);
+	ourtree.remove(300);
+	ourtree.remove(200);
+	ourtree.remove(101);
+	ourtree.remove(250);
+	ourtree.remove(170);
 	std::cout << "\n***after remove  ourtree***\n";
 	ourtree.inorder_print();
 	
