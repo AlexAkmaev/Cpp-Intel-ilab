@@ -32,7 +32,7 @@ class SearchTree final{
 	Node_* search__(Node_* node, T data) const noexcept;  //search for a Node_ by its content
 	Node_* push__(Node_* node, T data);  //add an element with data content to the tree
 	Node_* remove__(Node_* node, T data) noexcept;  //delete an element with the data content from the tree
-	void make_empty__() noexcept;  //deletes a tree
+	void make_empty__();  //deletes a tree
 	
 public:
 	SearchTree();
@@ -40,7 +40,7 @@ public:
 	SearchTree(SearchTree&& rhs) noexcept;
 	SearchTree<T>& operator=(const SearchTree& rhs);
 	SearchTree<T>& operator=(SearchTree&& rhs) noexcept;
-	~SearchTree() noexcept;
+	~SearchTree();
 
 	Node_* get_root() const noexcept;  //getting an immutable tree root
 	bool is_balanced() const;  //checking if tree is balanced
@@ -398,7 +398,7 @@ void SearchTree<T>::remove(T data) noexcept{
 }
 
 template<typename T>
-void SearchTree<T>::make_empty__() noexcept{
+void SearchTree<T>::make_empty__() {
 	if (!root_) 
 		return;
 
@@ -419,7 +419,7 @@ void SearchTree<T>::make_empty__() noexcept{
 }
 
 template<typename T>
-SearchTree<T>::~SearchTree() noexcept{
+SearchTree<T>::~SearchTree() {
 	make_empty__();
 	delete root_;
 }
