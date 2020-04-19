@@ -1,0 +1,26 @@
+a = 2*(4 + 10 / 2) - 11 - 2*4;
+b = 9;
+c = (a < b);
+print a;
+print b;
+if (2 > 0 &&  b != 9) {
+  a = 3;
+  print 90 + 100/10 + a;
+} else
+  print 777 + 2*b;
+print a;
+print c;
+
+iter = 3;
+while (iter > 0) {
+  print iter;
+  iter = iter - 1;
+  if (iter >= (12 - 2*8 + 12 / 2) || iter < 1) {
+    c = c + 1;
+  }
+}
+print iter;
+print c;
+
+ps = ?;
+print ps;
