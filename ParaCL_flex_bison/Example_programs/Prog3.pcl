@@ -1,26 +1,26 @@
 first = -1;
 second = 30;
 third = -2;
-print "Variables have their own scope";
-print ENDL;
-print "By default their values are 0";
-print ENDL;
 
-print "Enter value: ";
 fourth = ?;
 if ((first == 1 || third == -(-2 + 4)) || (second >= 1) && fourth*third < 0) {
   tmp = 7;
   first = second / fourth - tmp - third;
-  print "first = ";
   print first;
-  print ENDL;
 
-  if (fourth >= -1) {
-    print "fourth = ";
+  if (fourth >= 3) {
+    if (fourth >= 4)
+      g5 = 75;
+    g4 = 74;
     print fourth;
-    print ENDL;
   }
+  else
+    print fourth*4;
+  g2 = 72;
+  print g4;
+  print g5;
 }
 
-print "tmp in this scope = ";
 print tmp;
+print g2;
+print g5;

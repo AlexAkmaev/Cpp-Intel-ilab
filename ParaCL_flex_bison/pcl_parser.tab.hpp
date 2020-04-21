@@ -40,22 +40,21 @@
 #ifndef YY_YY_PCL_PARSER_TAB_HPP_INCLUDED
 # define YY_YY_PCL_PARSER_TAB_HPP_INCLUDED
 // //                    "%code requires" blocks.
-#line 16 "pcl_parser.ypp" // lalr1.cc:377
+#line 15 "pcl_parser.ypp" // lalr1.cc:377
 
     #include <iostream>
-    #include <vector>
-    #include <map>
+    #include <algorithm>
     #include <string>
-    #include <cassert>
     #include "nodes.hpp"
 
     #define SCOPES driver->scopes_
+
 
     namespace yy {
         class ParaCL_Driver;
     }
 
-#line 59 "pcl_parser.tab.hpp" // lalr1.cc:377
+#line 58 "pcl_parser.tab.hpp" // lalr1.cc:377
 
 
 # include <cstdlib> // std::abort
@@ -64,7 +63,7 @@
 # include <string>
 # include <vector>
 # include "stack.hh"
-# include "location.hh"
+
 
 #ifndef YYASSERT
 # include <cassert>
@@ -132,7 +131,7 @@
 
 
 namespace yy {
-#line 136 "pcl_parser.tab.hpp" // lalr1.cc:377
+#line 135 "pcl_parser.tab.hpp" // lalr1.cc:377
 
 
 
@@ -306,14 +305,11 @@ namespace yy {
 #else
     typedef YYSTYPE semantic_type;
 #endif
-    /// Symbol locations.
-    typedef location location_type;
 
     /// Syntax errors thrown from user actions.
     struct syntax_error : std::runtime_error
     {
-      syntax_error (const location_type& l, const std::string& m);
-      location_type location;
+      syntax_error (const std::string& m);
     };
 
     /// Tokens.
@@ -354,7 +350,7 @@ namespace yy {
     /// Expects its Base type to provide access to the symbol type
     /// via type_get().
     ///
-    /// Provide access to semantic value and location.
+    /// Provide access to semantic value.
     template <typename Base>
     struct basic_symbol : Base
     {
@@ -369,21 +365,20 @@ namespace yy {
 
       /// Constructor for valueless symbols, and symbols from each type.
 
-  basic_symbol (typename Base::kind_type t, const location_type& l);
+  basic_symbol (typename Base::kind_type t);
 
-  basic_symbol (typename Base::kind_type t, const Expr_t* v, const location_type& l);
+  basic_symbol (typename Base::kind_type t, const Expr_t* v);
 
-  basic_symbol (typename Base::kind_type t, const Oper_t* v, const location_type& l);
+  basic_symbol (typename Base::kind_type t, const Oper_t* v);
 
-  basic_symbol (typename Base::kind_type t, const int v, const location_type& l);
+  basic_symbol (typename Base::kind_type t, const int v);
 
-  basic_symbol (typename Base::kind_type t, const std::string v, const location_type& l);
+  basic_symbol (typename Base::kind_type t, const std::string v);
 
 
       /// Constructor for symbols with semantic value.
       basic_symbol (typename Base::kind_type t,
-                    const semantic_type& v,
-                    const location_type& l);
+                    const semantic_type& v);
 
       /// Destroy the symbol.
       ~basic_symbol ();
@@ -399,9 +394,6 @@ namespace yy {
 
       /// The semantic value.
       semantic_type value;
-
-      /// The location.
-      location_type location;
 
     private:
       /// Assignment operator.
@@ -448,55 +440,55 @@ namespace yy {
     // Symbol constructors declarations.
     static inline
     symbol_type
-    make_WHILE (const location_type& l);
+    make_WHILE ();
 
     static inline
     symbol_type
-    make_IF (const location_type& l);
+    make_IF ();
 
     static inline
     symbol_type
-    make_ELSE (const location_type& l);
+    make_ELSE ();
 
     static inline
     symbol_type
-    make_PRINT (const location_type& l);
+    make_PRINT ();
 
     static inline
     symbol_type
-    make_LESS_EQ (const location_type& l);
+    make_LESS_EQ ();
 
     static inline
     symbol_type
-    make_GRT_EQ (const location_type& l);
+    make_GRT_EQ ();
 
     static inline
     symbol_type
-    make_AND (const location_type& l);
+    make_AND ();
 
     static inline
     symbol_type
-    make_OR (const location_type& l);
+    make_OR ();
 
     static inline
     symbol_type
-    make_NOT_EQUAL (const location_type& l);
+    make_NOT_EQUAL ();
 
     static inline
     symbol_type
-    make_EQUAL (const location_type& l);
+    make_EQUAL ();
 
     static inline
     symbol_type
-    make_ERROR (const location_type& l);
+    make_ERROR ();
 
     static inline
     symbol_type
-    make_NUMBER (const int& v, const location_type& l);
+    make_NUMBER (const int& v);
 
     static inline
     symbol_type
-    make_ID (const std::string& v, const location_type& l);
+    make_ID (const std::string& v);
 
 
     /// Build a parser object.
@@ -522,9 +514,8 @@ namespace yy {
 #endif
 
     /// Report a syntax error.
-    /// \param loc    where the syntax error is found.
     /// \param msg    a description of the syntax error.
-    virtual void error (const location_type& loc, const std::string& msg);
+    virtual void error (const std::string& msg);
 
     /// Report a syntax error.
     void error (const syntax_error& err);
@@ -700,9 +691,9 @@ namespace yy {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 92,     ///< Last index in yytable_.
+      yylast_ = 96,     ///< Last index in yytable_.
       yynnts_ = 12,  ///< Number of nonterminal symbols.
-      yyfinal_ = 30, ///< Termination state number.
+      yyfinal_ = 31, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
       yyntokens_ = 30  ///< Number of tokens.
@@ -716,7 +707,7 @@ namespace yy {
 
 
 } // yy
-#line 720 "pcl_parser.tab.hpp" // lalr1.cc:377
+#line 711 "pcl_parser.tab.hpp" // lalr1.cc:377
 
 
 

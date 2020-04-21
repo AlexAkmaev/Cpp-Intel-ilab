@@ -20,7 +20,7 @@ while (iter > 0) {
   }
 }
 print iter;
-print c;
 
 ps = ?;
 print ps;
+print c;

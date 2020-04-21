@@ -41,9 +41,11 @@ class Block : public Oper_t {
             ops.push_back(op);
     }
 public:
-    Block() {}
-    Block(Oper_t* op) { append(op); }
-    Block(Oper_t* op1, Oper_t* op2) { append(op1); append(op2); }
+    //int* coun;
+    Block* prev_block = nullptr;
+    Block() = default;
+    explicit Block(Oper_t* op, Block* pbl) { append(op); prev_block = pbl; }
+    explicit Block(Oper_t* op1, Oper_t* op2, Block* pbl) { append(op1); append(op2); prev_block = pbl;}
     std::unordered_map<std::string, int> names;
     int size() { return ops.size(); }
     virtual void print(int indent=0) {
@@ -54,9 +56,21 @@ public:
     }
 
     virtual int Evaluate() {
+        //names.clear();
         foreach(i, ops) {
+
+            //if ((i) == prev(ops.end()))
+              //  names.clear();
             (*i)->Evaluate();
+            //std::cout << "i: "  << names.size()<< " \n";
+              //std::cout << "i: "  << 17 << " \n";
         }
+        std::cout << "size: "  << names.size()<< " \n";
+//        for(auto& i : names) {
+//            std::cout << "i: " << i.first << "=" << i.second << " ";
+//        }
+//        std::cout << "|\n";
+        clear();
         return 1;
     }
 
@@ -67,19 +81,37 @@ public:
         return true;
     }
 
+    void clear() {
+        names.clear();
+        ops.clear();
+    }
+
     virtual ~Block() { foreach(i, ops) delete *i; }
 };
 
+//bool operator==( Block*& r,  Block*& l) {
+//  if (r->names.size() != l->names.size())
+//    return false;
+//  for(auto& i : r->names){
+//    if (i.second != l->names.at(i.first))
+//        return false;
+//  }
+//  return true;
+//}
+
 
 class Exprop : public Oper_t {
-    Expr_t* expr;
+    Expr_t* expr = nullptr;
 public:
-    Exprop(Expr_t* expr) : expr(expr) {}
+    Exprop() = default;
+    explicit Exprop(Expr_t* expr) : expr(expr) {}
     virtual void print(int indent=0) {
         expr->print();
         std::cout << ";" << std::endl;
     }
     virtual int Evaluate() {
+        if(!expr)
+            return 0;
         return expr->Evaluate();
     }
     virtual ~Exprop() { delete expr; }
@@ -88,13 +120,8 @@ public:
 
 class Printop : public Oper_t {
     Expr_t* expr;
-    std::string message;
 public:
-    Printop(Expr_t* expr) : expr(expr) {
-        std::ostringstream os;
-        //os << expr->Evaluate();
-        message = os.str();
-    }
+    explicit Printop(Expr_t* expr) : expr(expr) {}
 
     virtual void print(int indent=0) {
         std::cout << "print ";
@@ -113,26 +140,61 @@ public:
 
 class Ifop : public Oper_t {
     Expr_t* cond;
-    Block thenops, elseops;
+    Block* thenops, *elseops;
+    //std::vector<Block*> scopes;
 public:
-    Ifop(Expr_t* cond, Oper_t* thenops, Oper_t* elseops) :
+//    explicit Ifop(Expr_t* cond, Oper_t* thenops, Oper_t* elseops) :// std::vector<Block*>& scs) :
+//    explicit Ifop(Expr_t* cond, const Block& thenops, const Block& elseops) :// std::vector<Block*>& scs) :
+    explicit Ifop(Expr_t* cond, Block* thenops, Block* elseops) :// std::vector<Block*>& scs) :
             cond(cond), thenops(thenops), elseops(elseops) {}
-    virtual void print(int indent=0) {
+//    virtual void print(int indent=0) {
+//        std::cout << "if "; cond->print();  std::cout << " {" << std::endl;
+//        thenops.print(indent + 1);
+//        if (elseops.size()) {
+//            std::cout << std::string(indent, '\t') << "} else {" << std::endl;
+//            elseops.print(indent+1);
+//        }
+//        std::cout << std::string(indent, '\t') << "}" << std::endl;
+//    }
+//
+//    virtual int Evaluate() {
+//        if (cond->Evaluate()) {
+//            //std::cout << " thenops:" << ((thenops.names.begin())->first) << "\n";
+//            int res = thenops.Evaluate();
+//            thenops.names.clear();
+//            //std::cout << "GG" << thenops.names.size() << "\n";
+//            return res;
+//        } else {
+//            if (elseops.size()) {
+//                //std::cout << " c:" << (elseops.coun) << "\n";
+//                int res = elseops.Evaluate();
+//                elseops.names.clear();
+//                return res;
+//            }
+//        }
+//        return 1;
+//    }
+
+   virtual void print(int indent=0) {
         std::cout << "if "; cond->print();  std::cout << " {" << std::endl;
-        thenops.print(indent + 1);
-        if (elseops.size()) {
+        thenops->print(indent + 1);
+        if (elseops->size()) {
             std::cout << std::string(indent, '\t') << "} else {" << std::endl;
-            elseops.print(indent+1);
+            elseops->print(indent+1);
         }
         std::cout << std::string(indent, '\t') << "}" << std::endl;
     }
 
     virtual int Evaluate() {
         if (cond->Evaluate()) {
-            return thenops.Evaluate();
+            int res = thenops->Evaluate();
+            thenops->clear();
+            return res;
         } else {
-            if (elseops.size()) {
-                return elseops.Evaluate();
+            if (elseops->size()) {
+                int res = elseops->Evaluate();
+                elseops->clear();
+                return res;
             }
         }
         return 1;
@@ -141,21 +203,20 @@ public:
     virtual ~Ifop() { delete cond; }
 };
 
-
 class Whileop : public Oper_t {
     Expr_t* cond;
-    Block ops;
+    Block* ops;
 public:
-    Whileop(Expr_t* cond, Oper_t* ops) : cond(cond), ops(ops) {}
+    explicit Whileop(Expr_t* cond, Block* ops) : cond(cond), ops(ops) {}
     virtual void print(int indent=0) {
         std::cout << "while "; cond->print();  std::cout << " {" << std::endl;
-        ops.print(indent + 1);
+        ops->print(indent + 1);
         std::cout << std::string(indent, '\t') << "}" << std::endl;
     }
 
     virtual int Evaluate() {
         while (cond->Evaluate()) {
-            ops.Evaluate();
+            ops->Evaluate();
         }
         return 1;
     }
@@ -163,12 +224,33 @@ public:
     virtual ~Whileop() { delete cond; }
 };
 
+//class Whileop : public Oper_t {
+//    Expr_t* cond;
+//    Block ops;
+//public:
+//    explicit Whileop(Expr_t* cond, Oper_t* ops) : cond(cond), ops(ops) {}
+//    virtual void print(int indent=0) {
+//        std::cout << "while "; cond->print();  std::cout << " {" << std::endl;
+//        ops.print(indent + 1);
+//        std::cout << std::string(indent, '\t') << "}" << std::endl;
+//    }
+//
+//    virtual int Evaluate() {
+//        while (cond->Evaluate()) {
+//            ops.Evaluate();
+//        }
+//        return 1;
+//    }
+//
+//    virtual ~Whileop() { delete cond; }
+//};
+
 
 class Binary_expr : public Expr_t {
     const std::string op;
     Expr_t *arg1, *arg2;
 public:
-    Binary_expr(const char* op, Expr_t *arg1, Expr_t *arg2) :
+    explicit Binary_expr(const char* op, Expr_t *arg1, Expr_t *arg2) :
             op(op), arg1(arg1), arg2(arg2) {}
     virtual void print() {
         std::cout << "(";
@@ -217,19 +299,12 @@ class Assign : public Expr_t {
     Expr_t* value;
     Block*& scope;
 public:
-    Assign(const std::string& name, Expr_t* value, Block*& sc) :
-            name(name), value(value), scope(sc) {
-                //int res = value->Evaluate();
-                //std::cout << " | " << res<< " |\n";;
-                //scope->names[name] = value->Evaluate();
-            }
+    explicit Assign(const std::string& name, Expr_t* value, Block*& sc) :
+            name(name), value(value), scope(sc) {}
     virtual void print() { std::cout << name << " = "; value->print(); }
     virtual int Evaluate() {
-        //std::cout << " | " << value->Evaluate() << " |\n";
         int res = value->Evaluate();
-        //std::cout << " | " << res<< " |\n";;
         scope->names[name] = res;
-        //std::cout << " | " << scope->names[name]<< " |\n";;
         return scope->names[name];
     }
     virtual ~Assign() { delete value; }
@@ -239,9 +314,8 @@ public:
 class Scanfop : public Expr_t {
     std::string name;
     Block*& scope;
-    //int value;
 public:
-    Scanfop(const std::string& name, Block*& sc) :
+    explicit Scanfop(const std::string& name, Block*& sc) :
             name(name), scope(sc) {}
     virtual void print() { std::cout << name << " = ?"; }
     virtual int Evaluate() {
@@ -257,7 +331,7 @@ class Unary_expr : public Expr_t {
     const char* op;
     Expr_t* arg;
 public:
-    Unary_expr(const char* op, Expr_t* arg) : op(op), arg(arg) {}
+    explicit Unary_expr(const char* op, Expr_t* arg) : op(op), arg(arg) {}
     virtual void print() { std::cout << op; arg->print(); }
 
     virtual int Evaluate() {
@@ -275,7 +349,7 @@ public:
 class Number : public Expr_t {
     int num;
 public:
-    Number(int val) : num(val) {}
+    explicit Number(int val) : num(val) {}
     virtual void print() { std::cout << num; }
     virtual int Evaluate() {
         return num;
@@ -286,10 +360,12 @@ public:
 class Value : public Expr_t {
     std::string id;
     Block*& scope;
+    //bool defined;
 public:
-    Value(const std::string& text, Block*& sc) : id(text), scope(sc) {}
+    explicit Value(const std::string& text, Block*& sc) : id(text), scope(sc) {}
     virtual void print() { std::cout << id; }
     virtual int Evaluate() {
+        //defined = scope->find(id);
         return scope->names[id];
     }
 };
