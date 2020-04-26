@@ -27,8 +27,7 @@ NAME	    [_[:alpha:]][_[:alnum:]]*
 "!="                    return yy::ParaCL_Parser::token_type::NOT_EQUAL;
 "=="                    return yy::ParaCL_Parser::token_type::EQUAL;
 [<>!\+\-*/{}()?=;]      return static_cast<yy::ParaCL_Parser::token_type>(yytext[0]);
-"0"                     return yy::ParaCL_Parser::token_type::NUMBER;
-{DIGIT1}{DIGIT}*        return yy::ParaCL_Parser::token_type::NUMBER;
+"0"|{DIGIT1}{DIGIT}*    return yy::ParaCL_Parser::token_type::NUMBER;
 {NAME}                  return yy::ParaCL_Parser::token_type::ID;
 .                       return yy::ParaCL_Parser::token_type::ERROR;
 
