@@ -13,8 +13,7 @@ int main(int argc, char *argv[]) {
   }
 
   std::ifstream input(argv[1]);
-  FlexLexer* lexer = new yyFlexLexer(&input);
-  yy::ParaCL_Driver driver(lexer);
+  yy::ParaCL_Driver driver(new yyFlexLexer(&input));
   driver.parse();
 
   return 0;

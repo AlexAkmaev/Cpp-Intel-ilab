@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <vector>
 #include <unordered_map>
 #include <list>
 
@@ -30,26 +31,32 @@ public:
 
 
 class Block : public Oper_t {
-    std::list<Oper_t*> ops;
+    //std::list<Oper_t*> ops;
+    std::vector<Oper_t*> ops;
+public:
     void append(Oper_t* op) {
         Block* b = dynamic_cast<Block*>(op);
+        //std::cout << "SSS:" << ops.size() << "\n";
         if(b) {
-            ops.splice(ops.end(), b->ops, b->ops.begin(), b->ops.end());
-            delete b;
+                //std::cout << "SSS:" << ops.size() << "\n";
+            //ops.splice(ops.end(), b->ops, b->ops.begin(), b->ops.end());
+            ops.insert(ops.end(), b->ops.begin(), b->ops.end());
+            //delete b;
         }
         else
             ops.push_back(op);
     }
-public:
     //int* coun;
     Block* prev_block = nullptr;
-    Block() = default;
+    explicit Block(Block*& prev) : prev_block(prev) {};
     explicit Block(Oper_t* op, Block* pbl) { append(op); prev_block = pbl; }
-    explicit Block(Oper_t* op1, Oper_t* op2, Block* pbl) { append(op1); append(op2); prev_block = pbl;}
+//    explicit Block(Oper_t* op1, Oper_t* op2, Block* pbl) { append(op1); append(op2); prev_block = pbl;}
+    explicit Block(Oper_t* op1, Oper_t* op2) { append(op1); append(op2); }
     std::unordered_map<std::string, int> names;
     int size() { return ops.size(); }
     virtual void print(int indent=0) {
         foreach(i, ops) {
+        //for(auto i = ops.begin(); i != ops.end(); ++i) {
             std::cout << std::string(indent, '\t');
             (*i)->print(indent);
         }
@@ -62,10 +69,10 @@ public:
             //if ((i) == prev(ops.end()))
               //  names.clear();
             (*i)->Evaluate();
-            //std::cout << "i: "  << names.size()<< " \n";
+            //std::cout << "KK: "  << names.size()<< " \n";
               //std::cout << "i: "  << 17 << " \n";
         }
-        std::cout << "size: "  << names.size()<< " \n";
+        //std::cout << "size: "  << names.size()<< " \n";
 //        for(auto& i : names) {
 //            std::cout << "i: " << i.first << "=" << i.second << " ";
 //        }
@@ -74,11 +81,32 @@ public:
         return 1;
     }
 
-    bool find(std::string id) {
+    bool find(const std::string& id) {
         auto it = names.find(id);
         if(it == names.end())
             return false;
         return true;
+    }
+
+    Block* find_block(const std::string& id) {
+        Block* res = this;
+        bool found = false;
+        while(!found && res != nullptr) {
+//            for(auto& i : res->names) {
+//                std::cout << "i: " << i.first << "=" << i.second << " ";
+//            }
+//            std::cout << "|\n";
+            if(!find(id)) {
+//                std::cout << "HI " << res->names.size()<< " ";
+                res = res->prev_block;
+            }
+            else
+                found = true;
+        }
+//        std::cout << "**\n";
+        if(found)
+            return res;
+        return this;
     }
 
     void clear() {
@@ -86,18 +114,9 @@ public:
         ops.clear();
     }
 
+
     virtual ~Block() { foreach(i, ops) delete *i; }
 };
-
-//bool operator==( Block*& r,  Block*& l) {
-//  if (r->names.size() != l->names.size())
-//    return false;
-//  for(auto& i : r->names){
-//    if (i.second != l->names.at(i.first))
-//        return false;
-//  }
-//  return true;
-//}
 
 
 class Exprop : public Oper_t {
@@ -145,35 +164,8 @@ class Ifop : public Oper_t {
 public:
 //    explicit Ifop(Expr_t* cond, Oper_t* thenops, Oper_t* elseops) :// std::vector<Block*>& scs) :
 //    explicit Ifop(Expr_t* cond, const Block& thenops, const Block& elseops) :// std::vector<Block*>& scs) :
-    explicit Ifop(Expr_t* cond, Block* thenops, Block* elseops) :// std::vector<Block*>& scs) :
+    explicit Ifop(Expr_t* cond, Block* thenops, Block* elseops) :
             cond(cond), thenops(thenops), elseops(elseops) {}
-//    virtual void print(int indent=0) {
-//        std::cout << "if "; cond->print();  std::cout << " {" << std::endl;
-//        thenops.print(indent + 1);
-//        if (elseops.size()) {
-//            std::cout << std::string(indent, '\t') << "} else {" << std::endl;
-//            elseops.print(indent+1);
-//        }
-//        std::cout << std::string(indent, '\t') << "}" << std::endl;
-//    }
-//
-//    virtual int Evaluate() {
-//        if (cond->Evaluate()) {
-//            //std::cout << " thenops:" << ((thenops.names.begin())->first) << "\n";
-//            int res = thenops.Evaluate();
-//            thenops.names.clear();
-//            //std::cout << "GG" << thenops.names.size() << "\n";
-//            return res;
-//        } else {
-//            if (elseops.size()) {
-//                //std::cout << " c:" << (elseops.coun) << "\n";
-//                int res = elseops.Evaluate();
-//                elseops.names.clear();
-//                return res;
-//            }
-//        }
-//        return 1;
-//    }
 
    virtual void print(int indent=0) {
         std::cout << "if "; cond->print();  std::cout << " {" << std::endl;
@@ -189,14 +181,16 @@ public:
         if (cond->Evaluate()) {
             int res = thenops->Evaluate();
             thenops->clear();
+            //std::cout << "XXXX\n";
             return res;
-        } else {
-            if (elseops->size()) {
-                int res = elseops->Evaluate();
-                elseops->clear();
-                return res;
-            }
         }
+//        else {
+//            if (elseops->size()) {
+//                int res = elseops->Evaluate();
+//                //elseops->clear();
+//                return res;
+//            }
+//        }
         return 1;
     }
 
@@ -297,31 +291,38 @@ public:
 class Assign : public Expr_t {
     std::string name;
     Expr_t* value;
-    Block*& scope;
+    Block*& scope;//&
 public:
-    explicit Assign(const std::string& name, Expr_t* value, Block*& sc) :
+    explicit Assign(const std::string& name, Expr_t* value, Block*& sc) ://&
             name(name), value(value), scope(sc) {}
     virtual void print() { std::cout << name << " = "; value->print(); }
     virtual int Evaluate() {
+        Block* cur_scope = scope->find_block(name);
         int res = value->Evaluate();
-        scope->names[name] = res;
-        return scope->names[name];
+        //std ::cout << "AAA::" << res << "\n";
+        cur_scope->names[name] = res;
+//        scope->find_block(name)->names[name] = res;
+//        std ::cout << "AAA::" << scope->find_block(name)->names[name]) << "\n";
+//        return cur_scope->names[name];
+        return res;
     }
     virtual ~Assign() { delete value; }
 };
 
 
 class Scanfop : public Expr_t {
-    std::string name;
-    Block*& scope;
+    std::string id;
+    Block*& scope;//&
 public:
-    explicit Scanfop(const std::string& name, Block*& sc) :
-            name(name), scope(sc) {}
-    virtual void print() { std::cout << name << " = ?"; }
+    explicit Scanfop(const std::string& name, Block*& sc) ://&
+            id(name), scope(sc) {}
+    virtual void print() { std::cout << id << " = ?"; }
     virtual int Evaluate() {
+        Block* cur_scope = scope->find_block(id);
         int value = -17;
         std::cin >> value;
-        scope->names[name] = value;
+//        scope->find_block(id)->names[id] = value;
+        cur_scope->names[id] = value;
         return value;
     }
 };
@@ -359,13 +360,17 @@ public:
 
 class Value : public Expr_t {
     std::string id;
-    Block*& scope;
+    Block*& scope;  //&
     //bool defined;
 public:
-    explicit Value(const std::string& text, Block*& sc) : id(text), scope(sc) {}
+    explicit Value(const std::string& text, Block*& sc) : id(text), scope(sc) {}  //&
     virtual void print() { std::cout << id; }
     virtual int Evaluate() {
         //defined = scope->find(id);
-        return scope->names[id];
+        Block* cur_scope = scope->find_block(id);
+//        std::cout << "TTT:" << scope->names.at(id) << "\n";
+//        return cur_scope->names[id];
+//        return scope->find_block(id)->names[id];
+        return cur_scope->names[id];
     }
 };

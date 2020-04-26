@@ -49,13 +49,13 @@
 
 #line 51 "pcl_parser.tab.cpp" // lalr1.cc:412
 // Unqualified %code blocks.
-#line 31 "pcl_parser.ypp" // lalr1.cc:413
+#line 40 "pcl_parser.ypp" // lalr1.cc:413
 
 #include "ParaCL_Driver.hpp"
 
     namespace yy {
         ParaCL_Parser::token_type yylex
-        (ParaCL_Parser::semantic_type* yylval,
+        (ParaCL_Parser::semantic_type* yylval, ParaCL_Parser::location_type* yylloc,
         ParaCL_Driver* driver);
     }
 
@@ -75,6 +75,25 @@
 # endif
 #endif
 
+#define YYRHSLOC(Rhs, K) ((Rhs)[K].location)
+/* YYLLOC_DEFAULT -- Set CURRENT to span from RHS[1] to RHS[N].
+   If N is 0, then set CURRENT to the empty location which ends
+   the previous symbol: RHS[0] (always defined).  */
+
+# ifndef YYLLOC_DEFAULT
+#  define YYLLOC_DEFAULT(Current, Rhs, N)                               \
+    do                                                                  \
+      if (N)                                                            \
+        {                                                               \
+          (Current).begin  = YYRHSLOC (Rhs, 1).begin;                   \
+          (Current).end    = YYRHSLOC (Rhs, N).end;                     \
+        }                                                               \
+      else                                                              \
+        {                                                               \
+          (Current).begin = (Current).end = YYRHSLOC (Rhs, 0).end;      \
+        }                                                               \
+    while (/*CONSTCOND*/ false)
+# endif
 
 
 // Suppress unused-variable warnings by "using" E.
@@ -127,7 +146,7 @@
 
 
 namespace yy {
-#line 131 "pcl_parser.tab.cpp" // lalr1.cc:479
+#line 150 "pcl_parser.tab.cpp" // lalr1.cc:479
 
   /// Build a parser object.
   ParaCL_Parser::ParaCL_Parser (yy::ParaCL_Driver* driver_yyarg)
@@ -148,8 +167,9 @@ namespace yy {
   `---------------*/
 
   inline
-  ParaCL_Parser::syntax_error::syntax_error (const std::string& m)
+  ParaCL_Parser::syntax_error::syntax_error (const location_type& l, const std::string& m)
     : std::runtime_error (m)
+    , location (l)
   {}
 
   // basic_symbol.
@@ -164,15 +184,17 @@ namespace yy {
   ParaCL_Parser::basic_symbol<Base>::basic_symbol (const basic_symbol& other)
     : Base (other)
     , value ()
+    , location (other.location)
   {
       switch (other.type_get ())
     {
-      case 36: // EXPR
-      case 37: // EXPR_L
-      case 38: // EXPR1
-      case 39: // EXPR2
-      case 40: // TERM
-      case 41: // VAL
+      case 37: // EXPR
+      case 38: // EXPR_L
+      case 39: // EXPR1
+      case 40: // EXPR2
+      case 41: // TERM
+      case 42: // VAL
+      case 43: // ifexpr
         value.copy< Expr_t* > (other.value);
         break;
 
@@ -180,7 +202,8 @@ namespace yy {
       case 32: // OPS
       case 33: // OP1
       case 34: // OP2
-      case 35: // OP
+      case 35: // ifscope
+      case 36: // OP
         value.copy< Oper_t* > (other.value);
         break;
 
@@ -201,19 +224,21 @@ namespace yy {
 
   template <typename Base>
   inline
-  ParaCL_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const semantic_type& v)
+  ParaCL_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const semantic_type& v, const location_type& l)
     : Base (t)
     , value ()
+    , location (l)
   {
     (void) v;
       switch (this->type_get ())
     {
-      case 36: // EXPR
-      case 37: // EXPR_L
-      case 38: // EXPR1
-      case 39: // EXPR2
-      case 40: // TERM
-      case 41: // VAL
+      case 37: // EXPR
+      case 38: // EXPR_L
+      case 39: // EXPR1
+      case 40: // EXPR2
+      case 41: // TERM
+      case 42: // VAL
+      case 43: // ifexpr
         value.copy< Expr_t* > (v);
         break;
 
@@ -221,7 +246,8 @@ namespace yy {
       case 32: // OPS
       case 33: // OP1
       case 34: // OP2
-      case 35: // OP
+      case 35: // ifscope
+      case 36: // OP
         value.copy< Oper_t* > (v);
         break;
 
@@ -242,33 +268,38 @@ namespace yy {
   // Implementation of basic_symbol constructor for each type.
 
   template <typename Base>
-  ParaCL_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t)
+  ParaCL_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const location_type& l)
     : Base (t)
     , value ()
+    , location (l)
   {}
 
   template <typename Base>
-  ParaCL_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const Expr_t* v)
+  ParaCL_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const Expr_t* v, const location_type& l)
     : Base (t)
     , value (v)
+    , location (l)
   {}
 
   template <typename Base>
-  ParaCL_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const Oper_t* v)
+  ParaCL_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const Oper_t* v, const location_type& l)
     : Base (t)
     , value (v)
+    , location (l)
   {}
 
   template <typename Base>
-  ParaCL_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const int v)
+  ParaCL_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const int v, const location_type& l)
     : Base (t)
     , value (v)
+    , location (l)
   {}
 
   template <typename Base>
-  ParaCL_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::string v)
+  ParaCL_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::string v, const location_type& l)
     : Base (t)
     , value (v)
+    , location (l)
   {}
 
 
@@ -297,12 +328,13 @@ namespace yy {
     // Type destructor.
     switch (yytype)
     {
-      case 36: // EXPR
-      case 37: // EXPR_L
-      case 38: // EXPR1
-      case 39: // EXPR2
-      case 40: // TERM
-      case 41: // VAL
+      case 37: // EXPR
+      case 38: // EXPR_L
+      case 39: // EXPR1
+      case 40: // EXPR2
+      case 41: // TERM
+      case 42: // VAL
+      case 43: // ifexpr
         value.template destroy< Expr_t* > ();
         break;
 
@@ -310,7 +342,8 @@ namespace yy {
       case 32: // OPS
       case 33: // OP1
       case 34: // OP2
-      case 35: // OP
+      case 35: // ifscope
+      case 36: // OP
         value.template destroy< Oper_t* > ();
         break;
 
@@ -345,12 +378,13 @@ namespace yy {
     super_type::move(s);
       switch (this->type_get ())
     {
-      case 36: // EXPR
-      case 37: // EXPR_L
-      case 38: // EXPR1
-      case 39: // EXPR2
-      case 40: // TERM
-      case 41: // VAL
+      case 37: // EXPR
+      case 38: // EXPR_L
+      case 39: // EXPR1
+      case 40: // EXPR2
+      case 41: // TERM
+      case 42: // VAL
+      case 43: // ifexpr
         value.move< Expr_t* > (s.value);
         break;
 
@@ -358,7 +392,8 @@ namespace yy {
       case 32: // OPS
       case 33: // OP1
       case 34: // OP2
-      case 35: // OP
+      case 35: // ifscope
+      case 36: // OP
         value.move< Oper_t* > (s.value);
         break;
 
@@ -374,6 +409,7 @@ namespace yy {
         break;
     }
 
+    location = s.location;
   }
 
   // by_type.
@@ -415,81 +451,81 @@ namespace yy {
   }
   // Implementation of make_symbol for each symbol type.
   ParaCL_Parser::symbol_type
-  ParaCL_Parser::make_WHILE ()
+  ParaCL_Parser::make_WHILE (const location_type& l)
   {
-    return symbol_type (token::WHILE);
+    return symbol_type (token::WHILE, l);
   }
 
   ParaCL_Parser::symbol_type
-  ParaCL_Parser::make_IF ()
+  ParaCL_Parser::make_IF (const location_type& l)
   {
-    return symbol_type (token::IF);
+    return symbol_type (token::IF, l);
   }
 
   ParaCL_Parser::symbol_type
-  ParaCL_Parser::make_ELSE ()
+  ParaCL_Parser::make_ELSE (const location_type& l)
   {
-    return symbol_type (token::ELSE);
+    return symbol_type (token::ELSE, l);
   }
 
   ParaCL_Parser::symbol_type
-  ParaCL_Parser::make_PRINT ()
+  ParaCL_Parser::make_PRINT (const location_type& l)
   {
-    return symbol_type (token::PRINT);
+    return symbol_type (token::PRINT, l);
   }
 
   ParaCL_Parser::symbol_type
-  ParaCL_Parser::make_LESS_EQ ()
+  ParaCL_Parser::make_LESS_EQ (const location_type& l)
   {
-    return symbol_type (token::LESS_EQ);
+    return symbol_type (token::LESS_EQ, l);
   }
 
   ParaCL_Parser::symbol_type
-  ParaCL_Parser::make_GRT_EQ ()
+  ParaCL_Parser::make_GRT_EQ (const location_type& l)
   {
-    return symbol_type (token::GRT_EQ);
+    return symbol_type (token::GRT_EQ, l);
   }
 
   ParaCL_Parser::symbol_type
-  ParaCL_Parser::make_AND ()
+  ParaCL_Parser::make_AND (const location_type& l)
   {
-    return symbol_type (token::AND);
+    return symbol_type (token::AND, l);
   }
 
   ParaCL_Parser::symbol_type
-  ParaCL_Parser::make_OR ()
+  ParaCL_Parser::make_OR (const location_type& l)
   {
-    return symbol_type (token::OR);
+    return symbol_type (token::OR, l);
   }
 
   ParaCL_Parser::symbol_type
-  ParaCL_Parser::make_NOT_EQUAL ()
+  ParaCL_Parser::make_NOT_EQUAL (const location_type& l)
   {
-    return symbol_type (token::NOT_EQUAL);
+    return symbol_type (token::NOT_EQUAL, l);
   }
 
   ParaCL_Parser::symbol_type
-  ParaCL_Parser::make_EQUAL ()
+  ParaCL_Parser::make_EQUAL (const location_type& l)
   {
-    return symbol_type (token::EQUAL);
+    return symbol_type (token::EQUAL, l);
   }
 
   ParaCL_Parser::symbol_type
-  ParaCL_Parser::make_ERROR ()
+  ParaCL_Parser::make_ERROR (const location_type& l)
   {
-    return symbol_type (token::ERROR);
+    return symbol_type (token::ERROR, l);
   }
 
   ParaCL_Parser::symbol_type
-  ParaCL_Parser::make_NUMBER (const int& v)
+  ParaCL_Parser::make_NUMBER (const int& v, const location_type& l)
   {
-    return symbol_type (token::NUMBER, v);
+    return symbol_type (token::NUMBER, v, l);
   }
 
   ParaCL_Parser::symbol_type
-  ParaCL_Parser::make_ID (const std::string& v)
+  ParaCL_Parser::make_ID (const std::string& v, const location_type& l)
   {
-    return symbol_type (token::ID, v);
+    return symbol_type (token::ID, v, l);
   }
 
 
@@ -542,16 +578,17 @@ namespace yy {
 
   inline
   ParaCL_Parser::stack_symbol_type::stack_symbol_type (state_type s, symbol_type& that)
-    : super_type (s)
+    : super_type (s, that.location)
   {
       switch (that.type_get ())
     {
-      case 36: // EXPR
-      case 37: // EXPR_L
-      case 38: // EXPR1
-      case 39: // EXPR2
-      case 40: // TERM
-      case 41: // VAL
+      case 37: // EXPR
+      case 38: // EXPR_L
+      case 39: // EXPR1
+      case 40: // EXPR2
+      case 41: // TERM
+      case 42: // VAL
+      case 43: // ifexpr
         value.move< Expr_t* > (that.value);
         break;
 
@@ -559,7 +596,8 @@ namespace yy {
       case 32: // OPS
       case 33: // OP1
       case 34: // OP2
-      case 35: // OP
+      case 35: // ifscope
+      case 36: // OP
         value.move< Oper_t* > (that.value);
         break;
 
@@ -586,12 +624,13 @@ namespace yy {
     state = that.state;
       switch (that.type_get ())
     {
-      case 36: // EXPR
-      case 37: // EXPR_L
-      case 38: // EXPR1
-      case 39: // EXPR2
-      case 40: // TERM
-      case 41: // VAL
+      case 37: // EXPR
+      case 38: // EXPR_L
+      case 39: // EXPR1
+      case 40: // EXPR2
+      case 41: // TERM
+      case 42: // VAL
+      case 43: // ifexpr
         value.copy< Expr_t* > (that.value);
         break;
 
@@ -599,7 +638,8 @@ namespace yy {
       case 32: // OPS
       case 33: // OP1
       case 34: // OP2
-      case 35: // OP
+      case 35: // ifscope
+      case 36: // OP
         value.copy< Oper_t* > (that.value);
         break;
 
@@ -615,6 +655,7 @@ namespace yy {
         break;
     }
 
+    location = that.location;
     return *this;
   }
 
@@ -642,7 +683,8 @@ namespace yy {
     if (yysym.empty ())
       std::abort ();
     yyo << (yytype < yyntokens_ ? "token" : "nterm")
-        << ' ' << yytname_[yytype] << " (";
+        << ' ' << yytname_[yytype] << " ("
+        << yysym.location << ": ";
     YYUSE (yytype);
     yyo << ')';
   }
@@ -736,6 +778,9 @@ namespace yy {
     /// The lookahead symbol.
     symbol_type yyla;
 
+    /// The locations where the error started and ended.
+    stack_symbol_type yyerror_range[3];
+
     /// The return value of parse ().
     int yyresult;
 
@@ -777,7 +822,7 @@ namespace yy {
         YYCDEBUG << "Reading a token: ";
         try
           {
-            yyla.type = yytranslate_ (yylex (&yyla.value, driver));
+            yyla.type = yytranslate_ (yylex (&yyla.value, &yyla.location, driver));
           }
         catch (const syntax_error& yyexc)
           {
@@ -833,12 +878,13 @@ namespace yy {
          when using variants.  */
         switch (yyr1_[yyn])
     {
-      case 36: // EXPR
-      case 37: // EXPR_L
-      case 38: // EXPR1
-      case 39: // EXPR2
-      case 40: // TERM
-      case 41: // VAL
+      case 37: // EXPR
+      case 38: // EXPR_L
+      case 39: // EXPR1
+      case 40: // EXPR2
+      case 41: // TERM
+      case 42: // VAL
+      case 43: // ifexpr
         yylhs.value.build< Expr_t* > ();
         break;
 
@@ -846,7 +892,8 @@ namespace yy {
       case 32: // OPS
       case 33: // OP1
       case 34: // OP2
-      case 35: // OP
+      case 35: // ifscope
+      case 36: // OP
         yylhs.value.build< Oper_t* > ();
         break;
 
@@ -863,6 +910,11 @@ namespace yy {
     }
 
 
+      // Compute the default @$.
+      {
+        slice<stack_symbol_type, stack_type> slice (yystack_, yylen);
+        YYLLOC_DEFAULT (yylhs.location, slice, yylen);
+      }
 
       // Perform the reduction.
       YY_REDUCE_PRINT (yyn);
@@ -871,254 +923,262 @@ namespace yy {
           switch (yyn)
             {
   case 2:
-#line 87 "pcl_parser.ypp" // lalr1.cc:859
+#line 96 "pcl_parser.ypp" // lalr1.cc:859
     {
                                             yylhs.value.as< Oper_t* > () = yystack_[0].value.as< Oper_t* > ();
                                             yystack_[0].value.as< Oper_t* > ()->Evaluate();
-                                            /*$1->print();*/
+                                            //$1->print();
                                             delete yystack_[0].value.as< Oper_t* > ();
                                         }
-#line 882 "pcl_parser.tab.cpp" // lalr1.cc:859
+#line 934 "pcl_parser.tab.cpp" // lalr1.cc:859
     break;
 
   case 3:
-#line 95 "pcl_parser.ypp" // lalr1.cc:859
-    { yylhs.value.as< Oper_t* > () = yystack_[0].value.as< Oper_t* > (); }
-#line 888 "pcl_parser.tab.cpp" // lalr1.cc:859
+#line 104 "pcl_parser.ypp" // lalr1.cc:859
+    { CBLOCK->append(yystack_[0].value.as< Oper_t* > ()); yylhs.value.as< Oper_t* > () = CBLOCK; }
+#line 940 "pcl_parser.tab.cpp" // lalr1.cc:859
     break;
 
   case 4:
-#line 96 "pcl_parser.ypp" // lalr1.cc:859
-    { Block* bl = new Block(yystack_[1].value.as< Oper_t* > (), yystack_[0].value.as< Oper_t* > (), SCOPES.front()); yylhs.value.as< Oper_t* > () = bl; std::cout << " " << SCOPES.size() <<" "; }
-#line 894 "pcl_parser.tab.cpp" // lalr1.cc:859
+#line 105 "pcl_parser.ypp" // lalr1.cc:859
+    {/*$1->print(); std::cout << ($1 != nullptr) << "  ^^^  "; $2->print(); std::cout << "\n|";CBLOCK->append($1); */
+                                          CBLOCK->append(yystack_[0].value.as< Oper_t* > ()); yylhs.value.as< Oper_t* > () = CBLOCK; }
+#line 947 "pcl_parser.tab.cpp" // lalr1.cc:859
     break;
 
   case 5:
-#line 99 "pcl_parser.ypp" // lalr1.cc:859
+#line 111 "pcl_parser.ypp" // lalr1.cc:859
     { yylhs.value.as< Oper_t* > () = yystack_[1].value.as< Oper_t* > (); }
-#line 900 "pcl_parser.tab.cpp" // lalr1.cc:859
+#line 953 "pcl_parser.tab.cpp" // lalr1.cc:859
     break;
 
   case 6:
-#line 100 "pcl_parser.ypp" // lalr1.cc:859
+#line 112 "pcl_parser.ypp" // lalr1.cc:859
     { yylhs.value.as< Oper_t* > () = new Exprop(yystack_[1].value.as< Expr_t* > ()); }
-#line 906 "pcl_parser.tab.cpp" // lalr1.cc:859
+#line 959 "pcl_parser.tab.cpp" // lalr1.cc:859
     break;
 
   case 7:
-#line 101 "pcl_parser.ypp" // lalr1.cc:859
-    { yylhs.value.as< Oper_t* > () = new Exprop(); }
-#line 912 "pcl_parser.tab.cpp" // lalr1.cc:859
+#line 114 "pcl_parser.ypp" // lalr1.cc:859
+    { yylhs.value.as< Oper_t* > () = new Printop(yystack_[1].value.as< Expr_t* > ()); }
+#line 965 "pcl_parser.tab.cpp" // lalr1.cc:859
     break;
 
   case 8:
-#line 102 "pcl_parser.ypp" // lalr1.cc:859
-    { yylhs.value.as< Oper_t* > () = new Printop(yystack_[1].value.as< Expr_t* > ()); }
-#line 918 "pcl_parser.tab.cpp" // lalr1.cc:859
+#line 119 "pcl_parser.ypp" // lalr1.cc:859
+    {
+                                          yylhs.value.as< Oper_t* > () = yystack_[0].value.as< Oper_t* > ();
+                                          CBLOCK = CBLOCK->prev_block;
+                                        }
+#line 974 "pcl_parser.tab.cpp" // lalr1.cc:859
     break;
 
   case 9:
-#line 103 "pcl_parser.ypp" // lalr1.cc:859
-    { Block* b1 = new Block(yystack_[2].value.as< Oper_t* > (), SCOPES.front()), *b2 = new Block(yystack_[0].value.as< Oper_t* > (), SCOPES.front());SCOPES.push_front(b2);  SCOPES.push_front(b1); yylhs.value.as< Oper_t* > () = new Ifop(yystack_[4].value.as< Expr_t* > (), b1, b2); }
-#line 924 "pcl_parser.tab.cpp" // lalr1.cc:859
+#line 125 "pcl_parser.ypp" // lalr1.cc:859
+    {Block* bl = CBLOCK;
+//                                           Block* b1 = new Block($2, SCOPES.front());
+//                                           if (SCOPES.size() >= 2) {
+//                                             Block*& bpr = SCOPES[1];
+//                                             bpr->prev_block = b1;
+//                                             SCOPES.insert(next(SCOPES.begin()), b1);
+//                                           } else {
+//                                             SCOPES.push_back(b1);
+//                                           }
+yystack_[1].location;//std::cout << "GGG:" << (bl != nullptr) << "\n"; bl->print();
+                                           bl->append(yystack_[0].value.as< Oper_t* > ());
+                                           yylhs.value.as< Oper_t* > () = new Ifop(yystack_[1].value.as< Expr_t* > (), bl, new Block(bl->prev_block));
+                                        }
+#line 992 "pcl_parser.tab.cpp" // lalr1.cc:859
     break;
 
   case 10:
-#line 104 "pcl_parser.ypp" // lalr1.cc:859
-    { Block* b = new Block(yystack_[0].value.as< Oper_t* > (), SCOPES.front()); SCOPES.push_front(b); yylhs.value.as< Oper_t* > () = new Whileop(yystack_[2].value.as< Expr_t* > (), b); }
-#line 930 "pcl_parser.tab.cpp" // lalr1.cc:859
+#line 142 "pcl_parser.ypp" // lalr1.cc:859
+    { yylhs.value.as< Oper_t* > () = yystack_[0].value.as< Oper_t* > (); }
+#line 998 "pcl_parser.tab.cpp" // lalr1.cc:859
     break;
 
   case 11:
-#line 107 "pcl_parser.ypp" // lalr1.cc:859
-    { Block* b1 = new Block(yystack_[0].value.as< Oper_t* > (), SCOPES.front()); SCOPES.push_front(b1); yylhs.value.as< Oper_t* > () = new Ifop(yystack_[2].value.as< Expr_t* > (), b1, new Block()); }
-#line 936 "pcl_parser.tab.cpp" // lalr1.cc:859
+#line 143 "pcl_parser.ypp" // lalr1.cc:859
+    { yylhs.value.as< Oper_t* > () = yystack_[0].value.as< Oper_t* > (); }
+#line 1004 "pcl_parser.tab.cpp" // lalr1.cc:859
     break;
 
   case 12:
-#line 108 "pcl_parser.ypp" // lalr1.cc:859
-    { Block* b1 = new Block(yystack_[2].value.as< Oper_t* > (), SCOPES.front()), *b2 = new Block(yystack_[0].value.as< Oper_t* > (), SCOPES.front()); SCOPES.push_front(b2);  SCOPES.push_front(b1); yylhs.value.as< Oper_t* > () = new Ifop(yystack_[4].value.as< Expr_t* > (), b1, b2); }
-#line 942 "pcl_parser.tab.cpp" // lalr1.cc:859
+#line 147 "pcl_parser.ypp" // lalr1.cc:859
+    { yylhs.value.as< Expr_t* > () = yystack_[0].value.as< Expr_t* > (); }
+#line 1010 "pcl_parser.tab.cpp" // lalr1.cc:859
     break;
 
   case 13:
-#line 109 "pcl_parser.ypp" // lalr1.cc:859
-    { Block* b = new Block(yystack_[0].value.as< Oper_t* > (), SCOPES.front()); SCOPES.push_front(b); yylhs.value.as< Oper_t* > () = new Whileop(yystack_[2].value.as< Expr_t* > (), b); }
-#line 948 "pcl_parser.tab.cpp" // lalr1.cc:859
+#line 148 "pcl_parser.ypp" // lalr1.cc:859
+    {
+//                                          if(SCOPES.empty())
+//                                            SCOPES.push_back(new Block());
+//                                          $$ = new Assign($1, $3, SCOPES.back());
+                                          //Block* cur = CBLOCK->find_block($1);
+                                          yylhs.value.as< Expr_t* > () = new Assign(yystack_[2].value.as< std::string > (), yystack_[0].value.as< Expr_t* > (), CBLOCK);
+                                        }
+#line 1022 "pcl_parser.tab.cpp" // lalr1.cc:859
     break;
 
   case 14:
-#line 112 "pcl_parser.ypp" // lalr1.cc:859
-    { yylhs.value.as< Oper_t* > () = yystack_[0].value.as< Oper_t* > (); }
-#line 954 "pcl_parser.tab.cpp" // lalr1.cc:859
-    break;
-
-  case 15:
-#line 113 "pcl_parser.ypp" // lalr1.cc:859
-    { yylhs.value.as< Oper_t* > () = yystack_[0].value.as< Oper_t* > (); }
-#line 960 "pcl_parser.tab.cpp" // lalr1.cc:859
-    break;
-
-  case 16:
-#line 116 "pcl_parser.ypp" // lalr1.cc:859
-    { yylhs.value.as< Expr_t* > () = yystack_[0].value.as< Expr_t* > (); }
-#line 966 "pcl_parser.tab.cpp" // lalr1.cc:859
-    break;
-
-  case 17:
-#line 117 "pcl_parser.ypp" // lalr1.cc:859
+#line 155 "pcl_parser.ypp" // lalr1.cc:859
     {
-//                                          Block& scope = driver->find_id($1);
-                                          Block* scope = (driver->find_id(yystack_[2].value.as< std::string > ()));
-                                          yylhs.value.as< Expr_t* > () = new Assign(yystack_[2].value.as< std::string > (), yystack_[0].value.as< Expr_t* > (), scope);
-//                                          $$ = new Assign($1, $3, &(driver->find_id($1)));
+//                                          if(SCOPES.empty())
+//                                            SCOPES.push_back(new Block());
+//                                          $$ = new Scanfop($1, SCOPES.back());
+                                          //Block* cur = CBLOCK->find_block($1);
+                                          //std::cout << "GGG:" << @3 << "\n";
+                                          yylhs.value.as< Expr_t* > () = new Scanfop(yystack_[2].value.as< std::string > (), CBLOCK);
                                         }
-#line 977 "pcl_parser.tab.cpp" // lalr1.cc:859
-    break;
-
-  case 18:
-#line 123 "pcl_parser.ypp" // lalr1.cc:859
-    {
-                                          Block* scope = (driver->find_id(yystack_[2].value.as< std::string > ()));
-                                          yylhs.value.as< Expr_t* > () = new Scanfop(yystack_[2].value.as< std::string > (), scope);
-//                                          $$ = new Scanfop($1, &(driver->find_id($1)));
-                                        }
-#line 987 "pcl_parser.tab.cpp" // lalr1.cc:859
-    break;
-
-  case 19:
-#line 130 "pcl_parser.ypp" // lalr1.cc:859
-    { yylhs.value.as< Expr_t* > () = yystack_[0].value.as< Expr_t* > (); }
-#line 993 "pcl_parser.tab.cpp" // lalr1.cc:859
-    break;
-
-  case 20:
-#line 131 "pcl_parser.ypp" // lalr1.cc:859
-    { yylhs.value.as< Expr_t* > () = new Binary_expr("||", yystack_[2].value.as< Expr_t* > (), yystack_[0].value.as< Expr_t* > ()); }
-#line 999 "pcl_parser.tab.cpp" // lalr1.cc:859
-    break;
-
-  case 21:
-#line 132 "pcl_parser.ypp" // lalr1.cc:859
-    { yylhs.value.as< Expr_t* > () = new Binary_expr("&&", yystack_[2].value.as< Expr_t* > (), yystack_[0].value.as< Expr_t* > ()); }
-#line 1005 "pcl_parser.tab.cpp" // lalr1.cc:859
-    break;
-
-  case 22:
-#line 135 "pcl_parser.ypp" // lalr1.cc:859
-    { yylhs.value.as< Expr_t* > () = yystack_[0].value.as< Expr_t* > (); }
-#line 1011 "pcl_parser.tab.cpp" // lalr1.cc:859
-    break;
-
-  case 23:
-#line 136 "pcl_parser.ypp" // lalr1.cc:859
-    { yylhs.value.as< Expr_t* > () = new Binary_expr("==", yystack_[2].value.as< Expr_t* > (), yystack_[0].value.as< Expr_t* > ()); }
-#line 1017 "pcl_parser.tab.cpp" // lalr1.cc:859
-    break;
-
-  case 24:
-#line 137 "pcl_parser.ypp" // lalr1.cc:859
-    { yylhs.value.as< Expr_t* > () = new Binary_expr("<=", yystack_[2].value.as< Expr_t* > (), yystack_[0].value.as< Expr_t* > ()); }
-#line 1023 "pcl_parser.tab.cpp" // lalr1.cc:859
-    break;
-
-  case 25:
-#line 138 "pcl_parser.ypp" // lalr1.cc:859
-    { yylhs.value.as< Expr_t* > () = new Binary_expr(">=", yystack_[2].value.as< Expr_t* > (), yystack_[0].value.as< Expr_t* > ()); }
-#line 1029 "pcl_parser.tab.cpp" // lalr1.cc:859
-    break;
-
-  case 26:
-#line 139 "pcl_parser.ypp" // lalr1.cc:859
-    { yylhs.value.as< Expr_t* > () = new Binary_expr("!=", yystack_[2].value.as< Expr_t* > (), yystack_[0].value.as< Expr_t* > ()); }
 #line 1035 "pcl_parser.tab.cpp" // lalr1.cc:859
     break;
 
-  case 27:
-#line 140 "pcl_parser.ypp" // lalr1.cc:859
-    { yylhs.value.as< Expr_t* > () = new Binary_expr(">", yystack_[2].value.as< Expr_t* > (), yystack_[0].value.as< Expr_t* > ()); }
+  case 15:
+#line 165 "pcl_parser.ypp" // lalr1.cc:859
+    { yylhs.value.as< Expr_t* > () = yystack_[0].value.as< Expr_t* > (); }
 #line 1041 "pcl_parser.tab.cpp" // lalr1.cc:859
     break;
 
-  case 28:
-#line 141 "pcl_parser.ypp" // lalr1.cc:859
-    { yylhs.value.as< Expr_t* > () = new Binary_expr("<", yystack_[2].value.as< Expr_t* > (), yystack_[0].value.as< Expr_t* > ()); }
+  case 16:
+#line 166 "pcl_parser.ypp" // lalr1.cc:859
+    { yylhs.value.as< Expr_t* > () = new Binary_expr("||", yystack_[2].value.as< Expr_t* > (), yystack_[0].value.as< Expr_t* > ()); }
 #line 1047 "pcl_parser.tab.cpp" // lalr1.cc:859
     break;
 
-  case 29:
-#line 144 "pcl_parser.ypp" // lalr1.cc:859
-    { yylhs.value.as< Expr_t* > () = yystack_[0].value.as< Expr_t* > (); }
+  case 17:
+#line 167 "pcl_parser.ypp" // lalr1.cc:859
+    { yylhs.value.as< Expr_t* > () = new Binary_expr("&&", yystack_[2].value.as< Expr_t* > (), yystack_[0].value.as< Expr_t* > ()); }
 #line 1053 "pcl_parser.tab.cpp" // lalr1.cc:859
     break;
 
-  case 30:
-#line 145 "pcl_parser.ypp" // lalr1.cc:859
-    { yylhs.value.as< Expr_t* > () = new Binary_expr("+", yystack_[2].value.as< Expr_t* > (), yystack_[0].value.as< Expr_t* > ()); }
+  case 18:
+#line 170 "pcl_parser.ypp" // lalr1.cc:859
+    { yylhs.value.as< Expr_t* > () = yystack_[0].value.as< Expr_t* > (); }
 #line 1059 "pcl_parser.tab.cpp" // lalr1.cc:859
     break;
 
-  case 31:
-#line 146 "pcl_parser.ypp" // lalr1.cc:859
-    { yylhs.value.as< Expr_t* > () = new Binary_expr("-", yystack_[2].value.as< Expr_t* > (), yystack_[0].value.as< Expr_t* > ()); }
+  case 19:
+#line 171 "pcl_parser.ypp" // lalr1.cc:859
+    { yylhs.value.as< Expr_t* > () = new Binary_expr("==", yystack_[2].value.as< Expr_t* > (), yystack_[0].value.as< Expr_t* > ()); }
 #line 1065 "pcl_parser.tab.cpp" // lalr1.cc:859
     break;
 
-  case 32:
-#line 149 "pcl_parser.ypp" // lalr1.cc:859
-    { yylhs.value.as< Expr_t* > () = yystack_[0].value.as< Expr_t* > (); }
+  case 20:
+#line 172 "pcl_parser.ypp" // lalr1.cc:859
+    { yylhs.value.as< Expr_t* > () = new Binary_expr("<=", yystack_[2].value.as< Expr_t* > (), yystack_[0].value.as< Expr_t* > ()); }
 #line 1071 "pcl_parser.tab.cpp" // lalr1.cc:859
     break;
 
-  case 33:
-#line 150 "pcl_parser.ypp" // lalr1.cc:859
-    { yylhs.value.as< Expr_t* > () = new Binary_expr("*", yystack_[2].value.as< Expr_t* > (), yystack_[0].value.as< Expr_t* > ()); }
+  case 21:
+#line 173 "pcl_parser.ypp" // lalr1.cc:859
+    { yylhs.value.as< Expr_t* > () = new Binary_expr(">=", yystack_[2].value.as< Expr_t* > (), yystack_[0].value.as< Expr_t* > ()); }
 #line 1077 "pcl_parser.tab.cpp" // lalr1.cc:859
     break;
 
-  case 34:
-#line 151 "pcl_parser.ypp" // lalr1.cc:859
-    { yylhs.value.as< Expr_t* > () = new Binary_expr("/", yystack_[2].value.as< Expr_t* > (), yystack_[0].value.as< Expr_t* > ()); }
+  case 22:
+#line 174 "pcl_parser.ypp" // lalr1.cc:859
+    { yylhs.value.as< Expr_t* > () = new Binary_expr("!=", yystack_[2].value.as< Expr_t* > (), yystack_[0].value.as< Expr_t* > ()); }
 #line 1083 "pcl_parser.tab.cpp" // lalr1.cc:859
     break;
 
-  case 35:
-#line 154 "pcl_parser.ypp" // lalr1.cc:859
-    { yylhs.value.as< Expr_t* > () = new Number(yystack_[0].value.as< int > ()); }
+  case 23:
+#line 175 "pcl_parser.ypp" // lalr1.cc:859
+    { yylhs.value.as< Expr_t* > () = new Binary_expr(">", yystack_[2].value.as< Expr_t* > (), yystack_[0].value.as< Expr_t* > ()); }
 #line 1089 "pcl_parser.tab.cpp" // lalr1.cc:859
     break;
 
-  case 36:
-#line 155 "pcl_parser.ypp" // lalr1.cc:859
-    { yylhs.value.as< Expr_t* > () = new Unary_expr("-", yystack_[0].value.as< Expr_t* > ()); }
+  case 24:
+#line 176 "pcl_parser.ypp" // lalr1.cc:859
+    { yylhs.value.as< Expr_t* > () = new Binary_expr("<", yystack_[2].value.as< Expr_t* > (), yystack_[0].value.as< Expr_t* > ()); }
 #line 1095 "pcl_parser.tab.cpp" // lalr1.cc:859
     break;
 
-  case 37:
-#line 156 "pcl_parser.ypp" // lalr1.cc:859
-    { yylhs.value.as< Expr_t* > () = new Unary_expr("!", yystack_[0].value.as< Expr_t* > ()); }
+  case 25:
+#line 179 "pcl_parser.ypp" // lalr1.cc:859
+    { yylhs.value.as< Expr_t* > () = yystack_[0].value.as< Expr_t* > (); }
 #line 1101 "pcl_parser.tab.cpp" // lalr1.cc:859
     break;
 
-  case 38:
-#line 157 "pcl_parser.ypp" // lalr1.cc:859
-    { yylhs.value.as< Expr_t* > () = yystack_[1].value.as< Expr_t* > (); }
+  case 26:
+#line 180 "pcl_parser.ypp" // lalr1.cc:859
+    { yylhs.value.as< Expr_t* > () = new Binary_expr("+", yystack_[2].value.as< Expr_t* > (), yystack_[0].value.as< Expr_t* > ()); }
 #line 1107 "pcl_parser.tab.cpp" // lalr1.cc:859
     break;
 
-  case 39:
-#line 158 "pcl_parser.ypp" // lalr1.cc:859
+  case 27:
+#line 181 "pcl_parser.ypp" // lalr1.cc:859
+    { yylhs.value.as< Expr_t* > () = new Binary_expr("-", yystack_[2].value.as< Expr_t* > (), yystack_[0].value.as< Expr_t* > ()); }
+#line 1113 "pcl_parser.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 28:
+#line 184 "pcl_parser.ypp" // lalr1.cc:859
+    { yylhs.value.as< Expr_t* > () = yystack_[0].value.as< Expr_t* > (); }
+#line 1119 "pcl_parser.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 29:
+#line 185 "pcl_parser.ypp" // lalr1.cc:859
+    { yylhs.value.as< Expr_t* > () = new Binary_expr("*", yystack_[2].value.as< Expr_t* > (), yystack_[0].value.as< Expr_t* > ()); }
+#line 1125 "pcl_parser.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 30:
+#line 186 "pcl_parser.ypp" // lalr1.cc:859
+    { yylhs.value.as< Expr_t* > () = new Binary_expr("/", yystack_[2].value.as< Expr_t* > (), yystack_[0].value.as< Expr_t* > ()); }
+#line 1131 "pcl_parser.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 31:
+#line 189 "pcl_parser.ypp" // lalr1.cc:859
+    { yylhs.value.as< Expr_t* > () = new Number(yystack_[0].value.as< int > ()); }
+#line 1137 "pcl_parser.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 32:
+#line 190 "pcl_parser.ypp" // lalr1.cc:859
+    { yylhs.value.as< Expr_t* > () = new Unary_expr("-", yystack_[0].value.as< Expr_t* > ()); }
+#line 1143 "pcl_parser.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 33:
+#line 191 "pcl_parser.ypp" // lalr1.cc:859
+    { yylhs.value.as< Expr_t* > () = new Unary_expr("!", yystack_[0].value.as< Expr_t* > ()); }
+#line 1149 "pcl_parser.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 34:
+#line 192 "pcl_parser.ypp" // lalr1.cc:859
+    { yylhs.value.as< Expr_t* > () = yystack_[1].value.as< Expr_t* > (); }
+#line 1155 "pcl_parser.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 35:
+#line 193 "pcl_parser.ypp" // lalr1.cc:859
     {
-//                                          Block& scope = driver->find_id($1);
-                                          Block* scope = (driver->find_id(yystack_[0].value.as< std::string > ()));
-                                          yylhs.value.as< Expr_t* > () = new Value(yystack_[0].value.as< std::string > (), scope);
-//                                          $$ = new Value($1, &(driver->find_id($1)));
+//                                          if(SCOPES.empty())
+//                                            SCOPES.push_back(new Block());
+//                                          $$ = new Value($1, SCOPES.back());
+                                          //Block* cur = CBLOCK->find_block($1);
+                                          //std::cout << "NNN:" << @1 << "\n";
+                                          yylhs.value.as< Expr_t* > () = new Value(yystack_[0].value.as< std::string > (), CBLOCK);
                                         }
-#line 1118 "pcl_parser.tab.cpp" // lalr1.cc:859
+#line 1168 "pcl_parser.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 36:
+#line 203 "pcl_parser.ypp" // lalr1.cc:859
+    {
+                                          //std::cout << "NNN:" << @3 << "\n";
+                                          CBLOCK = new Block(CBLOCK);
+                                          yylhs.value.as< Expr_t* > () = yystack_[1].value.as< Expr_t* > ();
+                                        }
+#line 1178 "pcl_parser.tab.cpp" // lalr1.cc:859
     break;
 
 
-#line 1122 "pcl_parser.tab.cpp" // lalr1.cc:859
+#line 1182 "pcl_parser.tab.cpp" // lalr1.cc:859
             default:
               break;
             }
@@ -1146,10 +1206,11 @@ namespace yy {
     if (!yyerrstatus_)
       {
         ++yynerrs_;
-        error (yysyntax_error_ (yystack_[0].state, yyla));
+        error (yyla.location, yysyntax_error_ (yystack_[0].state, yyla));
       }
 
 
+    yyerror_range[1].location = yyla.location;
     if (yyerrstatus_ == 3)
       {
         /* If just tried and failed to reuse lookahead token after an
@@ -1179,6 +1240,7 @@ namespace yy {
        code.  */
     if (false)
       goto yyerrorlab;
+    yyerror_range[1].location = yystack_[yylen - 1].location;
     /* Do not reclaim the symbols of the rule whose action triggered
        this YYERROR.  */
     yypop_ (yylen);
@@ -1210,11 +1272,14 @@ namespace yy {
           if (yystack_.size () == 1)
             YYABORT;
 
+          yyerror_range[1].location = yystack_[0].location;
           yy_destroy_ ("Error: popping", yystack_[0]);
           yypop_ ();
           YY_STACK_PRINT ();
         }
 
+      yyerror_range[2].location = yyla.location;
+      YYLLOC_DEFAULT (error_token.location, yyerror_range, 2);
 
       // Shift the error token.
       error_token.state = yyn;
@@ -1268,7 +1333,7 @@ namespace yy {
   void
   ParaCL_Parser::error (const syntax_error& yyexc)
   {
-    error (yyexc.what());
+    error (yyexc.location, yyexc.what());
   }
 
   // Generate an error message.
@@ -1279,109 +1344,104 @@ namespace yy {
   }
 
 
-  const signed char ParaCL_Parser::yypact_ninf_ = -46;
+  const signed char ParaCL_Parser::yypact_ninf_ = -21;
 
   const signed char ParaCL_Parser::yytable_ninf_ = -1;
 
   const signed char
   ParaCL_Parser::yypact_[] =
   {
-      27,   -23,   -18,    45,   -46,    10,    61,    27,   -46,    45,
-      61,    53,    27,   -46,   -46,   -46,     3,    26,     1,    -8,
-      23,   -46,    45,    45,    21,    43,   -46,   -46,     0,    29,
-     -46,   -46,   -46,   -46,    61,    61,    61,    61,    61,    61,
-      61,    61,    61,    61,    61,    61,    37,    41,   -46,   -46,
-     -46,   -46,   -46,     1,     1,    -8,    -8,    -8,    -8,    -8,
-      -8,    23,    23,   -46,   -46,    27,    27,   -46,   -46,    56,
-     -46,    27,   -46,   -46
+      22,   -20,     3,   -21,    15,    53,    22,    53,     3,    42,
+      22,   -21,   -21,   -21,   -21,    -1,    23,    -2,    16,    25,
+     -21,    37,     3,    31,    43,   -21,   -21,    -3,   -21,    32,
+     -21,   -21,   -21,    53,    53,    53,    53,    53,    53,    53,
+      53,    53,    53,    53,    53,   -21,    34,   -21,   -21,   -21,
+     -21,   -21,    -2,    -2,    16,    16,    16,    16,    16,    16,
+      25,    25,   -21,   -21,   -21
   };
 
   const unsigned char
   ParaCL_Parser::yydefact_[] =
   {
-       0,     0,     0,     0,    35,    39,     0,     0,     7,     0,
-       0,     0,     2,    14,    15,     3,     0,    16,    19,    22,
-      29,    32,     0,     0,     0,     0,    39,    36,     0,     0,
-      37,     1,     4,     6,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     8,    18,
-      17,     5,    38,    21,    20,    24,    25,    26,    23,    28,
-      27,    30,    31,    33,    34,     0,     0,    10,    13,    14,
-      11,     0,     9,    12
+       0,     0,     0,    31,    35,     0,     0,     0,     0,     0,
+       2,    10,    11,     8,     3,     0,    12,    15,    18,    25,
+      28,     0,     0,     0,     0,    35,    32,     0,    33,     0,
+       1,     4,     6,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     9,     0,     7,    14,    13,
+       5,    34,    17,    16,    20,    21,    22,    19,    24,    23,
+      26,    27,    29,    30,    36
   };
 
   const signed char
   ParaCL_Parser::yypgoto_[] =
   {
-     -46,   -46,    62,   -45,   -33,   -12,    25,   -46,    31,    55,
-      35,    -5
+     -21,   -21,    54,    45,   -21,   -21,    -6,     5,   -21,    14,
+      38,    12,    -5,   -21
   };
 
   const signed char
   ParaCL_Parser::yydefgoto_[] =
   {
-      -1,    11,    12,    13,    14,    15,    16,    17,    18,    19,
-      20,    21
+      -1,     9,    10,    11,    12,    13,    14,    15,    16,    17,
+      18,    19,    20,    21
   };
 
   const unsigned char
   ParaCL_Parser::yytable_[] =
   {
-      32,    27,    22,     1,     2,    30,     3,    23,    36,    37,
-      42,    43,    38,    39,     4,     5,    32,    40,    41,     6,
-      67,    69,     7,    51,     8,     9,    72,    33,    24,    10,
-       1,     2,    68,     3,    29,    34,    35,    25,    73,    63,
-      64,     4,     5,    44,    45,    48,     6,    46,    47,     7,
-      50,     8,     9,    31,    70,    52,    10,     4,     5,     4,
-       5,    71,     6,    65,     6,    53,    54,    66,     9,    28,
-       9,    49,    10,     0,    10,     4,    26,    61,    62,     0,
-       6,     0,     0,     0,     0,     0,     9,     0,     0,     0,
-      10,    55,    56,    57,    58,    59,    60
+      26,     1,    28,     2,    31,    35,    36,    23,    22,    37,
+      38,     3,     4,    29,    39,    40,     5,     3,     4,     6,
+      50,    31,     5,    32,     7,     8,     1,    46,     2,    49,
+       7,     8,    33,    34,    41,    42,     3,     4,    62,    63,
+      24,     5,    30,     2,     6,    43,    44,    52,    53,     7,
+       8,     3,     4,    60,    61,    47,     5,     3,     4,     6,
+      27,    51,     5,    64,     7,     8,    45,     3,    25,    48,
+       7,     8,     5,    54,    55,    56,    57,    58,    59,     0,
+       7,     8
   };
 
   const signed char
   ParaCL_Parser::yycheck_[] =
   {
-      12,     6,    25,     3,     4,    10,     6,    25,     7,     8,
-      18,    19,    11,    12,    14,    15,    28,    16,    17,    19,
-      65,    66,    22,    23,    24,    25,    71,    24,     3,    29,
-       3,     4,    65,     6,     9,     9,    10,    27,    71,    44,
-      45,    14,    15,    20,    21,    24,    19,    22,    23,    22,
-      25,    24,    25,     0,    66,    26,    29,    14,    15,    14,
-      15,     5,    19,    26,    19,    34,    35,    26,    25,     7,
-      25,    28,    29,    -1,    29,    14,    15,    42,    43,    -1,
-      19,    -1,    -1,    -1,    -1,    -1,    25,    -1,    -1,    -1,
-      29,    36,    37,    38,    39,    40,    41
+       5,     4,     7,     6,    10,     7,     8,     2,    28,    11,
+      12,    14,    15,     8,    16,    17,    19,    14,    15,    22,
+      23,    27,    19,    24,    27,    28,     4,    22,     6,    24,
+      27,    28,     9,    10,    18,    19,    14,    15,    43,    44,
+      25,    19,     0,     6,    22,    20,    21,    33,    34,    27,
+      28,    14,    15,    41,    42,    24,    19,    14,    15,    22,
+       6,    29,    19,    29,    27,    28,    21,    14,    15,    26,
+      27,    28,    19,    35,    36,    37,    38,    39,    40,    -1,
+      27,    28
   };
 
   const unsigned char
   ParaCL_Parser::yystos_[] =
   {
-       0,     3,     4,     6,    14,    15,    19,    22,    24,    25,
-      29,    31,    32,    33,    34,    35,    36,    37,    38,    39,
-      40,    41,    25,    25,    36,    27,    15,    41,    32,    36,
-      41,     0,    35,    24,     9,    10,     7,     8,    11,    12,
-      16,    17,    18,    19,    20,    21,    36,    36,    24,    28,
-      36,    23,    26,    38,    38,    39,    39,    39,    39,    39,
-      39,    40,    40,    41,    41,    26,    26,    33,    34,    33,
-      35,     5,    33,    34
+       0,     4,     6,    14,    15,    19,    22,    27,    28,    31,
+      32,    33,    34,    35,    36,    37,    38,    39,    40,    41,
+      42,    43,    28,    37,    25,    15,    42,    32,    42,    37,
+       0,    36,    24,     9,    10,     7,     8,    11,    12,    16,
+      17,    18,    19,    20,    21,    33,    37,    24,    26,    37,
+      23,    29,    39,    39,    40,    40,    40,    40,    40,    40,
+      41,    41,    42,    42,    29
   };
 
   const unsigned char
   ParaCL_Parser::yyr1_[] =
   {
-       0,    30,    31,    32,    32,    33,    33,    33,    33,    33,
-      33,    34,    34,    34,    35,    35,    36,    36,    36,    37,
-      37,    37,    38,    38,    38,    38,    38,    38,    38,    39,
-      39,    39,    40,    40,    40,    41,    41,    41,    41,    41
+       0,    30,    31,    32,    32,    33,    33,    33,    34,    35,
+      36,    36,    37,    37,    37,    38,    38,    38,    39,    39,
+      39,    39,    39,    39,    39,    40,    40,    40,    41,    41,
+      41,    42,    42,    42,    42,    42,    43
   };
 
   const unsigned char
   ParaCL_Parser::yyr2_[] =
   {
-       0,     2,     1,     1,     2,     3,     2,     1,     3,     7,
-       5,     5,     7,     5,     1,     1,     1,     3,     3,     1,
-       3,     3,     1,     3,     3,     3,     3,     3,     3,     1,
-       3,     3,     1,     3,     3,     1,     2,     2,     3,     1
+       0,     2,     1,     1,     2,     3,     2,     3,     1,     2,
+       1,     1,     1,     3,     3,     1,     3,     3,     1,     3,
+       3,     3,     3,     3,     3,     1,     3,     3,     1,     3,
+       3,     1,     2,     2,     3,     1,     4
   };
 
 
@@ -1394,18 +1454,19 @@ namespace yy {
   "$end", "error", "$undefined", "WHILE", "IF", "ELSE", "PRINT",
   "LESS_EQ", "GRT_EQ", "AND", "OR", "NOT_EQUAL", "EQUAL", "ERROR",
   "NUMBER", "ID", "'<'", "'>'", "'+'", "'-'", "'*'", "'/'", "'{'", "'}'",
-  "';'", "'('", "')'", "'='", "'?'", "'!'", "$accept", "PROGRAM", "OPS",
-  "OP1", "OP2", "OP", "EXPR", "EXPR_L", "EXPR1", "EXPR2", "TERM", "VAL", YY_NULLPTR
+  "';'", "'='", "'?'", "'!'", "'('", "')'", "$accept", "PROGRAM", "OPS",
+  "OP1", "OP2", "ifscope", "OP", "EXPR", "EXPR_L", "EXPR1", "EXPR2",
+  "TERM", "VAL", "ifexpr", YY_NULLPTR
   };
 
 
   const unsigned char
   ParaCL_Parser::yyrline_[] =
   {
-       0,    87,    87,    95,    96,    99,   100,   101,   102,   103,
-     104,   107,   108,   109,   112,   113,   116,   117,   123,   130,
-     131,   132,   135,   136,   137,   138,   139,   140,   141,   144,
-     145,   146,   149,   150,   151,   154,   155,   156,   157,   158
+       0,    96,    96,   104,   105,   111,   112,   114,   119,   125,
+     142,   143,   147,   148,   155,   165,   166,   167,   170,   171,
+     172,   173,   174,   175,   176,   179,   180,   181,   184,   185,
+     186,   189,   190,   191,   192,   193,   203
   };
 
   // Print the state stack on the debug stream.
@@ -1449,10 +1510,10 @@ namespace yy {
      0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,    29,     2,     2,     2,     2,     2,     2,
-      25,    26,    20,    18,     2,    19,     2,    21,     2,     2,
+       2,     2,     2,    27,     2,     2,     2,     2,     2,     2,
+      28,    29,    20,    18,     2,    19,     2,    21,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,    24,
-      16,    27,    17,    28,     2,     2,     2,     2,     2,     2,
+      16,    25,    17,    26,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -1488,17 +1549,17 @@ namespace yy {
 
 
 } // yy
-#line 1492 "pcl_parser.tab.cpp" // lalr1.cc:1167
-#line 166 "pcl_parser.ypp" // lalr1.cc:1168
+#line 1553 "pcl_parser.tab.cpp" // lalr1.cc:1167
+#line 210 "pcl_parser.ypp" // lalr1.cc:1168
 
 
 namespace yy {
 
-    ParaCL_Parser::token_type yylex(ParaCL_Parser::semantic_type* yylval, //ParaCL_Parser::location_type* yylloc,
+    ParaCL_Parser::token_type yylex(ParaCL_Parser::semantic_type* yylval, ParaCL_Parser::location_type* yylloc,
                              ParaCL_Driver* driver) {
-      return driver->yylex(yylval);
+      return driver->yylex(yylval, yylloc);
     }
 
-    void ParaCL_Parser::error(const std::string&){}
+    void ParaCL_Parser::error(const location_type&, const std::string&){}
 
 }
