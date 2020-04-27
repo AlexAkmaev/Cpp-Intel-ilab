@@ -12,7 +12,8 @@ if ((first == 1 || third == -(-2 + 4)) || (second >= 1) && fourth*third < 0) {
     if (fourth >= 4)
       g5 = 75;
     g4 = 74;
-    print fourth;
+    print fourth*6;
+    print g5;
   }
   //else
     //print fourth*4;
